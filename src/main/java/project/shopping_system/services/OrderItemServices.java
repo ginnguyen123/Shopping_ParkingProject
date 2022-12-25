@@ -6,23 +6,21 @@ import project.shopping_system.utils.IOFile;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-public class OrderItemServices implements AbstractServices<OrderItems>{
+public class OrderItemServices {//implements AbstractServices<OrderItems>
     private static String pathFile = "src/main/java/project/shopping_system/data/orderItems.csv";
+    private static String pathFileRemove = "src/main/java/project/shopping_system/data/data_removed/orderItems_removed.csv";
     private static OrderItemServices instance;
-    private static List<OrderItems> currentList;
-    public OrderItemServices(){}
+    private static OrderServices orderServices = OrderServices.getInstance();
+    public OrderItemServices(){ }
     public static OrderItemServices getInstance(){
         if (instance == null){
             instance = new OrderItemServices();
         }
         return instance;
     }
-
-    static List<OrderItems> findAll() {
+    public static List<OrderItems> findAll() {
         List<String> stringOrderItems = IOFile.readFile(pathFile);
         List<OrderItems> orderItemsList = new ArrayList<>();
         for (String strOrderItem : stringOrderItems){
@@ -30,105 +28,99 @@ public class OrderItemServices implements AbstractServices<OrderItems>{
         }
         return orderItemsList;
     }
-
-    static {
-        currentList = findAll();
+    public static List<OrderItems> findAllOrderItemsRemove() {
+        List<String> stringOrderItems = IOFile.readFile(pathFileRemove);
+        List<OrderItems> orderItemsList = new ArrayList<>();
+        for (String strOrderItem : stringOrderItems){
+            orderItemsList.add(OrderItems.parseOrderItems(strOrderItem));
+        }
+        return orderItemsList;
     }
 
-    public static List<OrderItems> getCurrentList() {
-        return currentList;
-    }
-
-    public static void setCurrentList(List<OrderItems> currentList) {
-        OrderItemServices.currentList = currentList;
-    }
-
-    @Override
     public void add(OrderItems newOrderItems) {
-        List<OrderItems> orderItemsList = currentList;
+        List<OrderItems> orderItemsList = findAll();
         orderItemsList.add(newOrderItems);
         IOFile.writeFile(orderItemsList,pathFile);
     }
-
-    @Override
-    public void edit(OrderItems orderItem) {
-        List<OrderItems> orderItemsList = currentList;
-        for (OrderItems oldOrderItem : orderItemsList){
-            if (oldOrderItem.getOrderID() == orderItem.getOrderID()){
+    public void edit(OrderItems orderItems){
+        List<OrderItems> orderItemsList = findAll();
+        for (OrderItems oldOrderItems : orderItemsList){
+            if (oldOrderItems.getOrderItemsID() == orderItems.getOrderItemsID()) {
                 Instant atUpdated = Instant.now();
-                //(long orderItemsID, String productName, int quantitis, double prices,
-                // long orderID, long productID, double totals)
-                String productName = orderItem.getProductName();
-                if (productName == null && !productName.trim().isEmpty())
-                    oldOrderItem.setProductName(productName);
-                int quantitis = orderItem.getQuantitis();
-                if (quantitis !=0 && quantitis>0)
-                    oldOrderItem.setOrderItemsID(quantitis);
-                double prices = orderItem.getPrices();
-                if (prices != 0 && prices > 0)
-                    oldOrderItem.setPrices(prices);
+                int quantitis = orderItems.getQuantitis();
+                if (quantitis>=0){
+                    oldOrderItems.setQuantitis(quantitis);
+                }
+                double totals = orderItems.getTotals();
+                if (totals >= 0)
+                    oldOrderItems.setTotals(totals);
             }
+        }
+        IOFile.writeFile(orderItemsList, pathFile);
+    }
+    public void remove(long orderItemID) {
+        List<OrderItems> orderItemsList = findAll();
+        List<OrderItems> orderItemsRemoveList = findAllOrderItemsRemove();
+        for (OrderItems orderItems : orderItemsList){
+            orderItemsRemoveList.add(orderItems);
+            orderItemsList.remove(orderItems);
+            break;
+        }
+        IOFile.writeFile(orderItemsRemoveList,pathFileRemove);
+        IOFile.writeFile(orderItemsList,pathFile);
+    }
+    public void removeOrderItemNotWrited(long orderItemID){
+        List<OrderItems> orderItemsList = findAll();
+        for (OrderItems orderItems : orderItemsList){
+            orderItemsList.remove(orderItems);
+            break;
         }
         IOFile.writeFile(orderItemsList,pathFile);
     }
-
-    @Override
-    public void remove(OrderItems orderItem) {
-        List<OrderItems> orderItemsList = currentList;
-        orderItemsList.remove(orderItem);
-        IOFile.writeFile(orderItemsList,pathFile);
+    public void removeAllOrderItemsInOrder(long orderID){
+        List<OrderItems> orderItemsList = findAll();
+        List<OrderItems> orderItemsRemoveList = findAllOrderItemsRemove();
+        for (OrderItems orderItems : orderItemsList){
+            if (orderItems.getOrderID() == orderID){
+                remove(orderItems.getOrderItemsID());
+            }
+        }
     }
-
-    @Override
     public OrderItems findObject(long orderItemsID) {
-        List<OrderItems> orderItemsList = currentList;
+        List<OrderItems> orderItemsList = findAll();
         for (OrderItems orderItems : orderItemsList){
             if (orderItems.getOrderItemsID() == orderItemsID)
                 return orderItems;
         }
         return null;
     }
-
-    @Override
-    public boolean isExistObject(long orderItemsID) {
-        List<OrderItems> orderItemsList = currentList;
+    public boolean isExistOrderItemsInOrder(long orderItemsID) {
+        List<OrderItems> orderItemsList = findAll();
         for (OrderItems orderItems : orderItemsList){
             if (orderItems.getOrderItemsID() == orderItemsID)
                 return true;
         }
         return false;
     }
-    @Override
-    public List<OrderItems> sortByNameAToZ() {
-        List<OrderItems> orderItemsList = currentList;
-        Collections.sort(orderItemsList, new Comparator<OrderItems>() {
-            @Override
-            public int compare(OrderItems orderItems1, OrderItems orderItems2) {
-                if (orderItems1.getProductName().compareTo(orderItems2.getProductName())>0){
-                    return 1;
-                } else if (orderItems1.getProductName().compareTo(orderItems2.getProductName())==0) {
-                    return 0;
-                }else
-                    return -1;
-            }
-        });
-        return orderItemsList;
+    public OrderItems findOrderItems(long orderID, long productID){
+        for (OrderItems orderItems : findAll()){
+            if (orderItems.getOrderID() == orderID && orderItems.getProductID() == productID)
+                return orderItems;
+        }
+        return null;
     }
-
-    @Override
-    public List<OrderItems> sortByNameZToA() {
-        List<OrderItems> orderItemsList = currentList;
-        Collections.sort(orderItemsList, new Comparator<OrderItems>() {
-            @Override
-            public int compare(OrderItems orderItems1, OrderItems orderItems2) {
-                if (orderItems1.getProductName().compareTo(orderItems2.getProductName())<0){
-                    return 1;
-                } else if (orderItems1.getProductName().compareTo(orderItems2.getProductName())==0) {
-                    return 0;
-                }else
-                    return -1;
-            }
-        });
-        return orderItemsList;
+    public boolean isExistOrderItems(long orderItemID){
+        for (OrderItems orderItems : findAll()){
+            if (orderItems.getOrderItemsID() == orderItemID)
+                return true;
+        }
+        return false;
+    }
+    public boolean isExistOrderItems(long orderID, long productID){
+        for (OrderItems orderItems : findAll()){
+            if (orderItems.getOrderID() == orderID && orderItems.getProductID() == productID)
+                return true;
+        }
+        return false;
     }
 }

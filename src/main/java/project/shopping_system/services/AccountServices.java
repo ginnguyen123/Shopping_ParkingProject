@@ -1,7 +1,7 @@
 package project.shopping_system.services;
 
 import project.shopping_system.models.Account;
-import project.shopping_system.models.Product;
+import project.shopping_system.models.AccountTypes;
 import project.shopping_system.utils.IOFile;
 
 import java.time.Instant;
@@ -22,7 +22,7 @@ public class AccountServices implements AbstractServices<Account> {
         return instance;
     }
 
-    static List<Account> findAll() {
+    public static List<Account> findAll() {
         List<String> stringList = IOFile.readFile(pathFile);
         List<Account> accountList = new ArrayList<>();
         for (String stringAccount : stringList){
@@ -30,28 +30,29 @@ public class AccountServices implements AbstractServices<Account> {
         }
         return accountList;
     }
-    static {
-        currentList = findAll();
-    }
 
-    public static List<Account> getCurrentList() {
-        return currentList;
-    }
 
-    public static void setCurrentList(List<Account> currentList) {
-        AccountServices.currentList = currentList;
+    public Account login(String username, String password){
+        List<Account> accountList = findAll();
+        for (Account account : accountList){
+            if (account.getUserName().equals(username) &&
+                    account.getPassWord().equals(password)){
+                return account;
+            }
+        }
+        return null;
     }
 
     @Override
     public void add(Account newAccount) {
-        List<Account> accountList = currentList;
+        List<Account> accountList = findAll();
         accountList.add(newAccount);
         IOFile.writeFile(accountList,pathFile);
     }
 
     @Override
     public void edit(Account account) {
-        List<Account> accountList = currentList;
+        List<Account> accountList = findAll();
         for (Account oldAccount : accountList){
             if (oldAccount.getAccountID() == account.getAccountID()){
                 Instant atUpdated = Instant.now();
@@ -79,15 +80,17 @@ public class AccountServices implements AbstractServices<Account> {
     }
 
     @Override
-    public void remove(Account account) {
-        List<Account> accountList = currentList;
-        accountList.remove(account);
+    public void remove(long accountID) {
+        List<Account> accountList = findAll();
+        for (Account account : accountList){
+            accountList.remove(account);
+        }
         IOFile.writeFile(accountList,pathFile);
     }
 
     @Override
     public Account findObject(long id) {
-        List<Account> accountList = currentList;
+        List<Account> accountList = findAll();
         for (Account account : accountList){
             if (account.getAccountID() == id){
                 return account;
@@ -98,7 +101,7 @@ public class AccountServices implements AbstractServices<Account> {
 
     @Override
     public boolean isExistObject(long id) {
-        List<Account> accountList = currentList;
+        List<Account> accountList = findAll();
         for (Account account : accountList){
             if (account.getAccountID() == id){
                 return true;
@@ -109,7 +112,7 @@ public class AccountServices implements AbstractServices<Account> {
 
     @Override
     public List<Account> sortByNameAToZ() {
-        List<Account> accountList = currentList;
+        List<Account> accountList = findAll();
         Collections.sort(accountList, new Comparator<Account>() {
             @Override
             public int compare(Account account1, Account account2) {
@@ -126,7 +129,7 @@ public class AccountServices implements AbstractServices<Account> {
 
     @Override
     public List<Account> sortByNameZToA() {
-        List<Account> accountList = currentList;
+        List<Account> accountList = findAll();
         Collections.sort(accountList, new Comparator<Account>() {
             @Override
             public int compare(Account account1, Account account2) {

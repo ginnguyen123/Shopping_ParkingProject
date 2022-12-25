@@ -6,8 +6,9 @@ import project.shopping_system.models.Product;
 import project.shopping_system.services.OrderItemServices;
 import project.shopping_system.services.OrderServices;
 import project.shopping_system.services.ProductServices;
+import project.shopping_system.utils.AppUtils;
 import project.shopping_system.utils.DateTimeUtil;
-import project.shopping_system.views.order.OrderItemViews;
+import project.shopping_system.views.Options;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,381 +19,543 @@ public class OrderViews {
     private OrderServices orderServices;
     private ProductServices productServices;
     private OrderItemServices orderItemServices;
+    private OrderItemViews orderItemViews;
     public OrderViews(){
         orderServices = OrderServices.getInstance();
         orderItemServices = OrderItemServices.getInstance();
         productServices = ProductServices.getInstance();
+        orderItemViews = new OrderItemViews();
     }
-//    (long orderID, String customerFullName,
-//    String customerPhoneNumber, String customerAddress, String customerEmail,
-//    double grandTotal,Instant atCreated, java.time.Instant atUpdated)
-    public void showOrder(Order order){
-        //hiển thị thông tin hóa đơn khách hàng
-        double grandTotal = 0; // tổng tiền hóa đơn
-        int count = 0; // đếm số item trên hóa đơn
-        List<OrderItems> orderItemsList = OrderItemServices.getCurrentList();
-        System.out.println(">Hiển thị thông tin hóa đơn khách hàng.");
-        System.out.printf("Họ và tên: %s\n", order.getCustomerFullName());
-        System.out.printf("Địa chỉ: %s\n",order.getCustomerAddress());
-        System.out.printf("Số điện thoại: %s\n",order.getCustomerPhoneNumber());
-        System.out.printf("Email: %s\n",order.getCustomerEmail());
-        System.out.printf("Ngày tạo: %s\n", DateTimeUtil.formatIntanceToString(order.getAtCreated()));
-        System.out.printf("Ngày cập nhật: %s\n",DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
-        System.out.printf("%s %s %s %s %s \n","ID","Tên sản phẩm", "Số lượng", "Giá","Tổng tiền");
-        for (OrderItems orderItem : orderItemsList){
-            //(long orderItemsID, String productName, int quantitis,double prices,long orderID, long productID, double totals)
-            if (orderItem.getOrderID() == order.getOrderID()){
-                System.out.printf("%d %s %d %f %f",orderItem.getOrderItemsID(), orderItem.getProductName(),orderItem.getQuantitis(),
-                        orderItem.getPrices(), orderItem.getTotals());
-                grandTotal += orderItem.getTotals();
-                count += count;
-            }
+    public void showOrderDetail(Order order,Options options){
+        if(options != Options.EDIT || options != Options.ADD || options == Options.FIND){
+            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
+                    "Address","Email","Grand total","ID employee","At created","At updated");
+            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
+                    order.getCustomerAddress(),order.getCustomerEmail(),order.getGrandTotal(),
+                    order.getUserID(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
         }
-        if (count == 0){
-            System.out.println(">Hóa đơn trống.");
+        if (orderServices.isExistObject(order.getOrderID())){
+            orderItemViews.showOrderItemExistList(order.getOrderID());
         }else
-            System.out.printf("Tổng tiền: %f\n",grandTotal);
-    } // hiển thị thông tin từng hóa đơn
-    //viết hiển thị hóa đơn theo ngày, theo tháng, theo năm.
-    public void showOrderList(){
-        List<Order> orderList = OrderServices.getCurrentList();
-    }
-    public void add(){
-        //tạo 1 hóa đơn mới
-        List<Order> orderList = OrderServices.getCurrentList();
-        long orderID = System.currentTimeMillis()%100000000;
-        //(long orderID, String customerFullName,
-        //                 String customerPhoneNumber, String customerAddress, String customerEmail,
-        //                 double grandTotal,Instant atCreated, Instant atUpdated)
-        System.out.print("Nhập họ tên khách hàng: ");
-        String customerFullName = scanner.nextLine();
-        System.out.printf("\nNhập số điện thoại khách hàng: ");
-        String customerPhoneNumber = scanner.nextLine();
-        System.out.print("\nNhập địa chỉ khách hàng: ");
-        String customerAddress = scanner.nextLine();
-        System.out.print("\nNhập email khách hàng: ");
-        String customerEmail = scanner.nextLine();
-        Instant atCreated = Instant.now();
-        Instant atUpdated = Instant.now();
-        Order order = new Order(orderID,customerFullName,customerPhoneNumber,customerAddress,
-                customerEmail,0.0,atCreated, atUpdated);
-        OrderServices.setCurrentList(orderList);
-        System.out.println("Tạo hóa đơn thành công!");
-        showOrder(order); // báo hóa đơn trống
-        List<OrderItems> orderItemsList = OrderItemServices.getCurrentList();
-        List<Product> productList = ProductServices.getCurrentList();
-        boolean flag = false;
-        do {
-            System.out.println("1.Thêm sản phẩm.");
-            System.out.println("0.Quay lại.");
+            orderItemViews.showOrderItemRemovedList(order.getOrderID());
+        if (options == Options.SHOW || options == Options.FIND || options == Options.EDIT
+                && (orderItemViews.showOrderItemExistList(order.getOrderID()))==false || orderItemViews.showOrderItemRemovedList(order.getOrderID()) == false) {
+            System.out.println("1.Thêm sản phẩm\t\t2.In hóa đơn\t\t3.Sửa hóa đơn\t\t0.Quay lại");
             System.out.print(">Chọn chức năng: ");
-            int choice = Integer.parseInt(scanner.nextLine());
+            int choice = AppUtils.retryParseIntInput();
             switch (choice){
                 case 1:
-                    OrderItemViews orderItemViews = new OrderItemViews();
-                    OrderItems orderItems = orderItemViews.add(order);
-                    for (Order o : orderList){
-                        if (o.getOrderID() == orderItems.getOrderID()){
-                            double grandTotal = o.getGrandTotal() + orderItems.getTotals();
-                            o.setGrandTotal(grandTotal);
-                        }
-                    }
-                    //gọi sang view thêm từng orderItem rồi trả về danh sách orderItem thuộc order
+                    orderItemViews.add(order.getOrderID());
+                    break;
+                case 2:
+                    remove(order.getOrderID());
+                    break;
+                case 3:
+                    editByID(order.getOrderID());
                     break;
                 case 0:
-                    flag = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng.");
+                    break;
+            }
+        }
+    }
+    public void showOrderList(List<Order> orderList, Options options){
+        int count = 0;
+        if (options == Options.SHOW || options == Options.EDIT || options == Options.REMOVE || options == Options.STATISTICAL) {
+            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
+                    "Address","Email","Grand total","ID employee","At created","At updated");
+            for (Order order : orderList){
+                ++count;
+                System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
+                        order.getCustomerAddress(),order.getCustomerEmail(),order.getGrandTotal(),
+                        order.getUserID(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
+
+            }
+        }
+        boolean isContinus = false;
+        if (options == Options.SORT || options == Options.SHOW || options == Options.STATISTICAL || options == Options.REMOVE){
+            do {
+                if (count == 0 && (options != Options.REMOVE||options == Options.SORT || options == Options.SHOW || options == Options.STATISTICAL)){
+                    System.out.println("0.Quay lại.");
+                    System.out.print(">Chọn chức năng: ");
+                    int choice = AppUtils.retryParseIntInput();
+                    switch (choice){
+                        case 0:
+                            break;
+                        default:
+                            isContinus = true;
+                            System.out.println("Chọn sai chức năng.");
+                    }
+                }
+                else {
+                    System.out.println("1.Xem chi tiết hóa đơn.\t\t\t\t0.Quay lại.");
+                    System.out.print(">Chọn chức năng: ");
+                    int choice = AppUtils.retryParseIntInput();
+                    switch (choice){
+                        case 1:
+                            findOrder(orderList);
+                            break;
+                        case 0:
+                            isContinus = false;
+                            break;
+                        default:
+                            isContinus = true;
+                            System.out.println("Chọn sai chức năng.");
+                    }
+                }
+            }while (isContinus);
+        }
+    }
+
+    public void add(long userID){
+        long orderID = System.currentTimeMillis() % 100000000;
+        String customerFullName = AppUtils.retryFullNameInput();
+        String customerPhoneNumber = AppUtils.retryPhonenumberInput();
+        String customerAddress = AppUtils.retryStreetAdressInput();
+        String customerEmail = AppUtils.retryEmailInput();
+        double grandTotal = 0;
+        Instant atCreated = Instant.now();
+        Instant atUpdated = Instant.now();
+        Order order = new Order(userID,orderID,customerFullName,customerPhoneNumber,
+                customerAddress,customerEmail,grandTotal,atCreated,atUpdated);
+        boolean isRetry = false;
+        orderServices.add(order);
+        showOrderDetail(order,Options.ADD);
+        System.out.println("Tạo hóa đơn thành công!");
+        System.out.println("1.Thêm sản phẩm\t\t\t\t2.Sửa hóa đơn\t\t\t\t0.Quay lại.");
+        boolean isContinus = true;
+        do {
+            System.out.print(">Chọn chức năng: ");
+            int choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    orderItemViews.add(orderID);
+                    break;
+                case 2:
+                    editByID(orderID);
+                    break;
+                case 0:
+                    isContinus = false;
                     break;
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                    System.out.println("1.Tiếp tục");
-                    System.out.println("0.Quay lại");
-                    System.out.print(">Chọn chức năng: ");
-                    int checkDefault = Integer.parseInt(scanner.nextLine());
-                    switch (checkDefault){
-                        case 1:
-                            flag = true;
-                            break;
-                        case 2:
-                            flag = false;
-                            break;
-                        default:
-                            System.out.println("Chọn sai chức năng.");
-                            System.out.println("Thoát chương trình");
-                            System.exit(2);
-                    }
                     break;
             }
-        }while (flag);
-    }
-    public void edit() {
-        List<Order> orderList = OrderServices.getCurrentList();
-        boolean flag = false;
-        boolean isRetry = false;
-        //boolean isChoiceContinus = false;
-        showOrderList();
-        System.out.println(">Sửa thông tin hóa đơn.");
-        do {
-            System.out.print("Nhập mã ID hóa đơn: ");
-            long orderID = Long.parseLong(scanner.nextLine());
-            if (orderServices.isExistObject(orderID)) {
-                do {
-                    System.out.println(">Quản lý hóa đơn khách hàng.");
-                    showOrder(orderServices.findObject(orderID));
-                    System.out.println();
-                    System.out.println("1.Sửa họ và tên.");
-                    System.out.println("2.Sửa số điện thoại.");
-                    System.out.println("3.Sửa địa chỉ.");
-                    System.out.println("4.Sửa Email.");
-                    System.out.println("0.Quay lại.");
-                    System.out.print(">Chọn chức năng: ");
-                    Order newOrder = new Order();
-                    newOrder.setOrderID(orderID);
-                    int choice = Integer.parseInt(scanner.nextLine());
-                    switch (choice) {
-                        case 1:
-                            System.out.print("Nhập họ và tên: ");
-                            String customerFullName = scanner.nextLine();
-                            newOrder.setCustomerFullName(customerFullName);
-                            break;
-                        case 2:
-                            System.out.print("Nhập số điện thoại: ");
-                            String customerPhoneNumber = scanner.nextLine();
-                            newOrder.setCustomerPhoneNumber(customerPhoneNumber);
-                            break;
-                        case 3:
-                            System.out.print("Nhập địa chỉ: ");
-                            String customerAddress = scanner.nextLine();
-                            newOrder.setCustomerAddress(customerAddress);
-                            break;
-                        case 4:
-                            System.out.print("Nhập Email: ");
-                            String customerEmail = scanner.nextLine();
-                            newOrder.setCustomerEmail(customerEmail);
-                            break;
-                        case 0:
-                            //thoát chương trình, quay về menu trước đó
-                            System.exit(5);
-                            break;
-                        default:
-                            //trường hợp nhập sai lần 1
-                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                            System.out.println("Bạn muốn tiếp tục?");
-                            System.out.println("1.Tiếp tục.");
-                            System.out.println("0.Quay lại.");
-                            System.out.print(">Chọn chức năng: ");
-                            int choiceDefault = Integer.parseInt(scanner.nextLine());
-                            switch (choiceDefault) {
-                                case 1:
-                                    //quay về menu quản lý hóa đơn
-                                    flag = true;
-                                    break;
-                                case 0:
-                                    //quay về nhập ID
-                                    flag = false; // thoát vòng lặp menu
-                                    isRetry = true;
-                                    break;
-                                default:
-                                    //chọn sai chức năng lần 2 thì thoát, quay về menu trước đó
-                                    System.out.println("Chọn sai chức năng.");
-                                    System.out.println("Thoát chương trình.");
-                                    System.exit(3);
-                            }
-                            break;
-                    }
-                    if (choice == 1 || choice == 2 || choice == 3 || choice == 4) {
-                        boolean isChoiceAgree = false;
-                        flag = false;
-                        //showOrder(newOrder);
-                        do {
-                            System.out.printf("Bạn có muốn thay đổi thông tin hóa đơn %d này?\n", orderServices.findObject(orderID).getOrderID());
-                            System.out.println("1.Đồng ý.");
-                            System.out.println("0.Quay lại.");
-                            System.out.print(">Chọn chức năng: ");
-                            int choiceAgrees = Integer.parseInt(scanner.nextLine());
-                            switch (choiceAgrees){
-                                case 1:
-                                    orderServices.edit(newOrder);
-                                    System.out.println("Đã cập nhật thành công!");
-                                    break;
-                                case 0:
-                                    flag = true;
-                                    break;
-                                default:
-                                    System.out.println("Chọn sai chức năng. Kiếm tra lại.");
-                                    isChoiceAgree = true;
-                                    break;
-                            }
-                        } while (isChoiceAgree);
-                    }
-                }while (flag);
-            }
-            else {
-                    System.out.println("Mã ID hóa đơn không tồn tại.");
-                    System.out.println("Bạn muốn tiếp tục?");
-                    System.out.println("1.Tiếp tục.");
-                    System.out.println("0.Quay lại.");
-                    System.out.print(">Chọn chức năng: ");
-                    int choiceContinus = Integer.parseInt(scanner.nextLine());
-                    switch (choiceContinus){
-                        case 1:
-                            isRetry = true;
-                            break;
-                        case 0:
-                            System.exit(2);
-                            break;
-                        default:
-                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                            System.out.println("Bạn muốn tiếp tục?");
-                            System.out.println("1.Tiếp tục.");
-                            System.out.println("0.Quay lại.");
-                            System.out.print(">Chọn chức năng: ");
-                            int choiceDefault = Integer.parseInt(scanner.nextLine());
-                            switch (choiceDefault){
-                                case 1:
-                                    isRetry = true;
-                                    break;
-                                case 0:
-                                    //thoát quay lại menu cũ không thông báo
-                                    isRetry = false;
-                                    break;
-                                default:
-                                    System.out.println("Chọn sai chức năng.");
-                                    System.out.println("Thoát chương trình.");
-                                    System.exit(4);
-                            }
-                            break;
-                    }
-                }
-        }while (isRetry);
+        }while (isContinus);
     }
     public void remove(){
-        List<Order> orderList = OrderServices.getCurrentList();
         boolean isRetry = false;
-        boolean isContinus = false;
-        boolean isChoice = false; // biến check nhập id đúng nhưng chọn sai chức năng
-        System.out.println(">Xóa hóa đơn.");
+        showOrderList(OrderServices.findAll(),Options.REMOVE);
+        System.out.print("Nhập mã ID hóa đơn: ");
+        long orderID = AppUtils.retryParseLongInput();
         do {
-            System.out.print("Nhập mã ID hóa đơn: ");
-            long orderID = Long.parseLong(scanner.nextLine());
             if (orderServices.isExistObject(orderID)){
-                Order order = orderServices.findObject(orderID);
-                showOrder(order);
-                do {
-                    System.out.printf("Bạn muốn xoá hóa đơn %s này?\n",orderID);
-                    System.out.println("1.Đồng ý");
-                    System.out.println("0.Quay lại.");
-                    System.out.print(">Chọn chức năng: ");
-                    int choice = Integer.parseInt(scanner.nextLine());
-                    switch (choice){
-                        case 1:
-                            orderServices.remove(order);
-                            System.out.println("Đã cập nhật thành công.");
-                            break;
-                        case 0:
-                            //thoát remove quay về menu ban đầu
-                            isRetry = false;
-                            break;
-                        default:
-                            //chọn sai chức năng lần 1
-                            System.out.println("Chọn sai chức năng. Kiểm tra lại");
-                            System.out.println("Bạn muốn tiếp tục?");
-                            System.out.println("1.Tiếp tục.");
-                            System.out.println("0.Quay lại.");
-                            System.out.print(">Chọn chức năng: ");
-                            int choiceDefault = Integer.parseInt(scanner.nextLine());
-                            switch (choiceDefault){
-                                case 1:
-                                    isChoice = true;
-                                    break;
-                                case 0:
-                                    isChoice = false; // thoát vòng lặp accept
-                                    isRetry = false; //thoát remove quay về menu đầu
-                                    break;
-                                default:
-                                    //chọn sai chức năng lần 2, thoát quay về menu cũ
-                                    System.out.println("Chọn sai chức năng.");
-                                    System.out.println("Thoát chương trình.");
-                                    System.exit(3);
-                                    break;
-                            }
-                    }
-                    if (choice == 1){
-                        isChoice = false;
-                        System.out.println("Bạn có muốn tiếp tục chương trình?");
-                        System.out.println("1.Tiếp tục.");
-                        System.out.println("0.Quay lại.");
-                        System.out.print(">Chọn chức năng: ");
-                        int choiceContinus = Integer.parseInt(scanner.nextLine());
-                        switch (choiceContinus){
-                            case 1:
-                                isRetry = true;
-                                break;
-                            case 0:
-                                isRetry = false;
-                                break;
-                            default:
-                                System.out.println("Chọn sai chức năng. Kiểm tra lại");
-                                System.out.println("Bạn muốn tiếp tục?");
-                                System.out.println("1.Tiếp tục.");
-                                System.out.println("0.Quay lại.");
-                                System.out.print(">Chọn chức năng: ");
-                                int choiceDefault = Integer.parseInt(scanner.nextLine());
-                                switch (choiceDefault){
-                                    case 1:
-                                        isRetry = true;
-                                        break;
-                                    case 0:
-                                        System.exit(3);
-                                        break;
-                                    default:
-                                        System.out.println("Chọn sai chức năng.");
-                                        System.out.println("Thoát chương trình.");
-                                        System.exit(3);
-                                        break;
-                                }
-                                break;
-                        }
-                    }
-                }while (isChoice);
-            }
-            else {
-                System.out.println("Mã ID hóa đơn không tồn tại.");
-                System.out.println("Bạn muốn tiếp tục?");
-                System.out.println("1.Tiếp tục.");
-                System.out.println("0.Quay lại.");
-                System.out.print(">Chọn chức năng: ");
-                int choiceContinus = Integer.parseInt(scanner.nextLine());
-                switch (choiceContinus){
-                    case 1:
-                        isRetry = true;
-                        break;
-                    case 0:
-                        System.exit(2);
-                        break;
-                    default:
-                        System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                        System.out.println("Bạn muốn tiếp tục?");
-                        System.out.println("1.Tiếp tục.");
-                        System.out.println("0.Quay lại.");
-                        System.out.print(">Chọn chức năng: ");
-                        int choiceDefault = Integer.parseInt(scanner.nextLine());
-                        switch (choiceDefault){
-                            case 1:
-                                isRetry = true;
-                                break;
-                            case 0:
-                                //thoát quay lại menu cũ không thông báo
-                                isRetry = false;
-                                break;
-                            default:
-                                System.out.println("Chọn sai chức năng.");
-                                System.out.println("Thoát chương trình.");
-                                System.exit(4);
-                        }
-                        break;
+                showOrderDetail(orderServices.findObject(orderID),Options.REMOVE);
+                System.out.println("Bạn đồng ý in hóa đơn này?");
+                boolean isAccept = AppUtils.isAcceptMenu();
+                if (isAccept){
+                    orderServices.remove(orderID);
+                    orderItemServices.removeAllOrderItemsInOrder(orderID);
+                    System.out.println("Đã in hóa đơn thành công.");
                 }
+            }else {
+                System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+                isRetry = AppUtils.isRetry(Options.REMOVE);
             }
         }while (isRetry);
     }
+    private void remove(long orderID){
+        if (orderServices.isExistObject(orderID)){
+//            showOrderDetail(orderServices.findObject(orderID),Options.REMOVE);
+            System.out.println("Bạn đồng ý in hóa đơn này?");
+            if (AppUtils.isAcceptMenu()){
+                orderServices.remove(orderID);
+                orderItemServices.removeAllOrderItemsInOrder(orderID);
+                System.out.println("Đã in hóa đơn thành công.");
+            }
+        }else {
+            System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+        }
+    }
+    private void editMenu(){
+        boolean isEmptyOrderItem = false;
+        //String customerFullName,
+        //                 String customerPhoneNumber, String customerAddress, String customerEmail,
+        System.out.println(">Quản lý hóa đơn.");
+        System.out.println("1.Sửa họ và tên.");
+        System.out.println("2.Sửa số điện thoại.");
+        System.out.println("3.Sửa địa chỉ.");
+        System.out.println("4.Sửa email.");
+        System.out.println("5.Sửa danh mục sản phẩm hóa đơn.");
+        System.out.println("0.Quay lại.");
+        System.out.print(">Chọn chức năng: ");
+    }
+    public void edit(){
+        System.out.println(">Sửa thông tin hóa đơn.");
+        showOrderList(OrderServices.findAll(), Options.EDIT);
+//        boolean isRetry = false;
+//        int choice ;
+            System.out.print("Nhập mã ID đơn hàng: ");
+            long orderID = AppUtils.retryParseLongInput();
+        if (orderServices.isExistObject(orderID)){
+            editMenu();
+            Order newOrder = new Order();
+            newOrder.setOrderID(orderID);
+            int choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    System.out.print("Nhập họ và tên: ");
+                    String customerFullName = AppUtils.retryFullNameInput();
+                    newOrder.setCustomerFullName(customerFullName);
+                    break;
+                case 2:
+                    System.out.print("Nhập số điện thoại: ");
+                    String customerPhoneNumber = AppUtils.retryPhonenumberInput();
+                    newOrder.setCustomerPhoneNumber(customerPhoneNumber);
+                    break;
+                case 3:
+                    System.out.print("Nhập địa chỉ: ");
+                    String customerAddress = AppUtils.retryStreetAdressInput();
+                    newOrder.setCustomerAddress(customerAddress);
+                    break;
+                case 4:
+                    System.out.print("Nhập email: ");
+                    String customerEmail = AppUtils.retryEmailInput();
+                    newOrder.setCustomerEmail(customerEmail);
+                    break;
+                case 5:
+                    orderItemViews.edit(orderID);
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("Nhập sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice == 1 || choice == 2 || choice == 3 || choice == 4){
+                System.out.println("Bạn muốn cập nhập thông tin mới?");
+                boolean isAccept = AppUtils.isAcceptMenu();
+                if (isAccept){
+                    orderServices.edit(newOrder);
+                }
+            }
+        }else {
+            System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+        }
+    }
+    public void editByID(long orderID){
+        if (orderServices.isExistObject(orderID)){
+            editMenu();
+            Order newOrder = new Order();
+            newOrder.setOrderID(orderID);
+            int choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    System.out.print("Nhập họ và tên: ");
+                    String customerFullName = AppUtils.retryFullNameInput();
+                    newOrder.setCustomerFullName(customerFullName);
+                    break;
+                    case 2:
+                        System.out.print("Nhập số điện thoại: ");
+                        String customerPhoneNumber = AppUtils.retryPhonenumberInput();
+                        newOrder.setCustomerPhoneNumber(customerPhoneNumber);
+                        break;
+                    case 3:
+                        System.out.print("Nhập địa chỉ: ");
+                        String customerAddress = AppUtils.retryStreetAdressInput();
+                        newOrder.setCustomerAddress(customerAddress);
+                        break;
+                    case 4:
+                        System.out.print("Nhập email: ");
+                        String customerEmail = AppUtils.retryEmailInput();
+                        newOrder.setCustomerEmail(customerEmail);
+                        break;
+                case 5:
+                    orderItemViews.edit(orderID);
+                    break;
+                    case 0:
+                        break;
+                    default:
+                        System.out.println("Nhập sai chức năng. Kiểm tra lại.");
+                        break;
+                }
+                if (choice!=0){
+                    System.out.println("Bạn muốn cập nhập thông tin mới?");
+                    boolean isAccept = AppUtils.isAcceptMenu();
+                    if (isAccept){
+                        orderServices.edit(newOrder);
+                    }
+                }
+            }else {
+                System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+            }
+    }
+    public void findOrderAdminMenu(){
+        boolean isRetry = false;
+        do {
+            System.out.println(">Menu tìm kiếm hóa đơn.");
+            System.out.println("1.Tìm hóa đơn chưa in.");
+            System.out.println("2.Tìm hóa đơn đã in.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            int choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    findExistOrder();
+                    break;
+                case 2:
+                    findRemovedOrder();
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    isRetry = true;
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice == 1 || choice == 2)
+                isRetry = AppUtils.isRetry(Options.FIND);
+        }while (isRetry);
+    }
+    public void findOrder(List<Order> orderList){
+        showOrderList(orderList, Options.FIND);
+        boolean isContinus = false;
+        do {
+            System.out.print("Nhập mã ID hóa đơn: ");
+            long orderID = AppUtils.retryParseLongInput();
+            if (orderServices.isExistObject(orderID)){
+                Order order = orderServices.findObject(orderID);
+                showOrderDetail(order,Options.SHOW);
+//                showOrderDetail(orderServices.findObject(orderID),Options.SHOW);
+            } else if (orderServices.isRemoveObject(orderID)) {
+                orderItemViews.showOrderItemRemovedList(orderID);
+                Order order = orderServices.findRemovedObject(orderID);
+                showOrderDetail(order,Options.STATISTICAL);
+//                showOrderDetail(orderServices.findRemovedObject(orderID),Options.STATISTICAL);
+            } else{
+                System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+                isContinus = AppUtils.isRetry(Options.FIND);
+            }
+        }while (isContinus);
 
+    }
+    public void findExistOrder(){
+        System.out.println(">Menu tìm kiếm hóa đơn.");
+        showOrderList(OrderServices.findAll(),Options.FIND);
+        System.out.print("Nhập mã ID hóa đơn: ");
+        long orderID = AppUtils.retryParseLongInput();
+        if (orderServices.isExistObject(orderID)){
+            showOrderDetail(orderServices.findObject(orderID),Options.SHOW);
+        }else
+            System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+    }
+    private void findRemovedOrder(){
+        showOrderList(OrderServices.findAllOrdersRemoved(),Options.REMOVE);
+        System.out.print("Nhập mã ID hóa đơn: ");
+        long orderID = AppUtils.retryParseLongInput();
+        if (orderServices.isRemoveObject(orderID)){
+            showOrderDetail(orderServices.findRemovedObject(orderID),Options.FIND);
+            //xem chi tiết hóa đơn, orderItemViews
+        }else
+            System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+    }
+    public void sortOrderMenuAdmin(){
+        int choice;
+        boolean isRetry = true;
+        do {
+            System.out.println("Menu sắp xếp hóa đơn.");
+            System.out.println("1.Sắp xếp hóa đơn chưa in.");
+            System.out.println("2.Sắp xếp hóa đơn đã in.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    sortExistOrderMenu();
+                    break;
+                case 2:
+                    sortRemovedOrderMenu();
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice != 0)
+                isRetry = AppUtils.isRetry(Options.SORT);
+        }while (isRetry);
+
+    }
+    public void sortExistOrderMenu(){
+        boolean isRetry = true;
+        int choice;
+        do {
+            System.out.println("Menu sắp xếp hóa đơn.");
+            System.out.println("1.Sắp xếp theo tổng tiền hóa đơn.");
+            System.out.println("2.Sắp xếp theo họ tên khách hàng.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    sortByGrandTotalOrderMenu();
+                    break;
+                case 2:
+                    sortByCustomerFullNameOrderMenu();
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice != 0)
+                isRetry = AppUtils.isRetry(Options.SORT);
+        }while (isRetry);
+    }
+    private void sortRemovedOrderMenu(){
+        boolean isRetry = true;
+        int choice;
+        do {
+            System.out.println("Menu sắp xếp hóa đơn.");
+            System.out.println("1.Sắp xếp theo tổng tiền hóa đơn.");
+            System.out.println("2.Sắp xếp theo họ tên khách hàng.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    sortByGrandTotalOrderRemovedMenu();
+                    break;
+                case 2:
+                    sortByCustomerFullNameOrderRemoveMenu();
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice != 0)
+                isRetry = AppUtils.isRetry(Options.SORT);
+        }while (isRetry);
+    }
+    private void sortByGrandTotalOrderRemovedMenu(){
+        boolean isRetry = true;
+        int choice;
+        do {
+            System.out.println(">Sắp xếp theo tổng tiền hóa đơn");
+            System.out.println("1.Sắp xếp theo tổng tiền tăng dần.");
+            System.out.println("2.Sắp xếp theo tổng tiền giảm dần.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    showOrderList(orderServices.sortByGrandTotalIncreaseOrderRemoved(),Options.SORT);
+                    break;
+                case 2:
+                    showOrderList(orderServices.sortByGrandTotalDecreaseOrderRemoved(),Options.SORT);
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra laị.");
+                    break;
+            }
+            if(choice!=0)
+                isRetry = AppUtils.isRetry(Options.SORT);
+        }while (isRetry);
+    }
+    private void sortByCustomerFullNameOrderRemoveMenu(){
+        boolean isRetry = true;
+        int choice;
+        do {
+            System.out.println(">Sắp xếp theo họ tên khách hàng.");
+            System.out.println("1.Sắp xếp từ A đến Z.");
+            System.out.println("2.Sắp xếp từ Z đến A.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    showOrderList(orderServices.sortByNameAToZOrderRemoved(),Options.SORT);
+                    break;
+                case 2:
+                    showOrderList(orderServices.sortByNameZToAOrderRemoved(),Options.SORT);
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice != 0)
+                isRetry = AppUtils.isRetry(Options.SORT);
+        }while (isRetry);
+    }
+    private void sortByCustomerFullNameOrderMenu(){
+        boolean isRetry = true;
+        int choice;
+        do {
+            System.out.println(">Sắp xếp theo họ tên khách hàng.");
+            System.out.println("1.Sắp xếp từ A đến Z.");
+            System.out.println("2.Sắp xếp từ Z đến A.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    showOrderList(orderServices.sortByNameAToZ(),Options.SORT);
+                    break;
+                case 2:
+                    showOrderList(orderServices.sortByNameZToA(),Options.SORT);
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    break;
+            }
+            if (choice != 0)
+                isRetry = AppUtils.isRetry(Options.SORT);
+        }while (isRetry);
+    }
+    private void sortByGrandTotalOrderMenu(){
+        boolean isRetry = false;
+        int choice;
+        do {
+            System.out.println(">Sắp xếp theo tổng tiền hóa đơn");
+            System.out.println("1.Sắp xếp theo tổng tiền tăng dần.");
+            System.out.println("2.Sắp xếp theo tổng tiền giảm dần.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    showOrderList(orderServices.sortByGrandTotalIncrease(),Options.SORT);
+                    break;
+                case 2:
+                    showOrderList(orderServices.sortByGrandTotalDecrease(),Options.SORT);
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra laị.");
+                    isRetry = AppUtils.isRetry(Options.SORT);
+                    break;
+            }
+        }while (isRetry);
+    }
 }

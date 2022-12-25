@@ -134,6 +134,6 @@ public class Account {
         //                   String address, AccountTypes accountTypes, Instant atCreated, Instant atUpdated)
         return String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                 accountID,userName,passWord,fullName,phoneNumbers,
-                email,address,accountTypes,atCreated,atUpdated);
+                email,address,accountTypes.getValue(),atCreated,atUpdated);
     }
 }

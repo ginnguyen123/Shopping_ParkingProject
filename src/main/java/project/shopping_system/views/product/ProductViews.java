@@ -1,11 +1,10 @@
 package project.shopping_system.views.product;
 
-import project.shopping_system.models.Order;
 import project.shopping_system.models.Product;
-import project.shopping_system.services.OrderServices;
 import project.shopping_system.services.ProductServices;
+import project.shopping_system.utils.AppUtils;
 import project.shopping_system.utils.DateTimeUtil;
-import project.shopping_system.utils.IOFile;
+import project.shopping_system.views.Options;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,325 +16,412 @@ public class ProductViews {
     public ProductViews(){
         productServices = ProductServices.getInstance();
     }
-    public void showList(){
-        List<Product> productList = ProductServices.getCurrentList();
-        //(long productID, String titles, int quantitys, double prices, Instant atCreated, Instant atUpdated)
-        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
-        System.out.println("------------------");
+    public void showProductList(Options options,List<Product> productList){
+        System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-20s| %-20s|\n",
+                "ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
         for (Product product : productList){
-            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
+            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-20s| %-20s|\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
                     product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
                     DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
-            System.out.println("------------------");
+        }
+        if (options != Options.ADD && options != Options.EDIT && options != Options.REMOVE){
+            System.out.println("Nhấn phím bất kì để tiếp tục.");
+            String anyPress = scanner.nextLine();
         }
     }
-    public void showProduct(Product product){
-
-    }
-
-    public void add(){
-        System.out.println(">Thêm sản phẩm.");
-        List<Product> productList = ProductServices.getCurrentList();
-        boolean choiceContinuesCheck = false;
+    private int quantitys(Options option){
+        switch (option){
+            case EDIT:
+                System.out.print("Nhập số lượng sản phẩm mới: ");
+                break;
+            case ADD:
+                System.out.print("Nhập số lượng sản phẩm: ");
+                break;
+        }
+        int quantitys;
         do {
-            long idNewProduct = System.currentTimeMillis()%100000000;
-            System.out.print("Nhập tên sản phẩm: ");
-            String titles = scanner.nextLine();
-            System.out.print("Nhập số lượng sản phẩm: ");
-            int quantitys = Integer.parseInt(scanner.nextLine());
-            System.out.print("Nhập giá sản phẩm: ");
-            double prices = Double.parseDouble(scanner.nextLine());
-            Instant atCreated = Instant.now();
-            boolean flag = false;
-            //show màn hình sản phẩm thêm ra -> hỏi Y/N
+            quantitys = AppUtils.retryParseIntInput();
+            if(quantitys < 0){
+                System.out.println("Nhập số lượng lớn hơn hoặc bằng 0. Vui lòng nhập lại.");
+            }
+        }while (quantitys < 0);
+        return quantitys;
+    }
+    private long prices(Options option){
+        switch (option){
+            case EDIT:
+                System.out.print("Nhập giá sản phẩm mới: ");
+                break;
+            case ADD:
+                System.out.print("Nhập giá sản phẩm: ");
+                break;
+        }
+        long prices;
+        do {
+            prices = AppUtils.retryParseLongInput();
+            if(prices < 0){
+                System.out.println("Nhập số lượng lớn hơn hoặc bằng 0. Vui lòng nhập lại.");
+            }
+        }while (prices < 0);
+        return prices;
+    }
+    private String titles(Options option){
+        switch (option){
+            case ADD:
+                System.out.print("Nhập tên sản phẩm: ");
+                break;
+            case EDIT:
+                System.out.print("Nhập tên sản phẩm mới: ");
+                break;
+        }
+        String titles = scanner.nextLine();
+        AppUtils.retryString(titles);
+        return titles;
+    }
+    public void showProduct(Product product, Options options){
+        System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-20s| %-20s|\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
+        System.out.println("------------------");
+        System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-20s| %-20s|\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
+                product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
+                DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
+        System.out.println("------------------");
+        if (options != Options.ADD && options != Options.EDIT && options != Options.REMOVE) {
+            System.out.print("Nhấn phím bất kì để tiếp tục.\n");
+            String anyPress = scanner.nextLine(); // chờ nhấn phím
+        }
+    }
+    public void sortProductMenu(){
+        boolean isRetry = false;
+        do {
+            System.out.println(">Sắp xếp sản phẩm theo:");
+            System.out.println("1.Sắp xếp theo tên sản phẩm.");
+            System.out.println("2.Sắp xếp theo giá sản phẩm.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            int choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    sortByTitlesProductMenu();
+                    break;
+                case 2:
+                    sortByPricesProductMenu();
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    isRetry = AppUtils.isRetry(Options.SORT);
+                    break;
+            }
+        }while (isRetry);
+    }
+    private void sortByTitlesProductMenu(){
+        int choice;
+        boolean flag = false;
+        boolean isContinus = true;
+        boolean isRetry = false;
+        do {
             do {
-                System.out.println("Bạn muốn thêm sản phẩm này?");
-                System.out.println("1.Đồng ý.");
-                System.out.println("0.Quay lại.");
-                System.out.print(">Chọn chức năng: ");
-                int choice = Integer.parseInt(scanner.nextLine());
-                switch (choice){
-                    case 1:
-                        Instant atUpdated = Instant.now();
-                        Product product = new Product(idNewProduct,titles,quantitys,prices,atCreated,atUpdated);
-                        productServices.add(product);
-                        System.out.println("Đã cập nhật sản phẩm thành công!");
-                        break;
-                    case 0:
-                        //thoát funtione quay lại menu chính.
-                        flag = false;
-                        choiceContinuesCheck = false;
-                        break;
-                    default:
-                        System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                        flag = true;
-                        break;
-                }
-                if (choice == 1){
-                    System.out.println("Bạn muốn tiếp tục thêm sản phẩm?");
-                    System.out.println("1.Tiếp tục.");
+                do {
+                    System.out.println("1.Sắp xếp từ A -> Z.");
+                    System.out.println("2.Sắp xếp từ Z -> A.");
                     System.out.println("0.Quay lại.");
                     System.out.print(">Chọn chức năng: ");
-                    int choiceContinues = Integer.parseInt(scanner.nextLine());
-                    switch (choiceContinues){
+                    choice = AppUtils.retryParseIntInput();
+                    switch (choice){
                         case 1:
-                            choiceContinuesCheck = true;
+                            sortByNameAToZViews();
+                            break;
+                        case 2:
+                            sortByNameZToAViews();
                             break;
                         case 0:
-                            choiceContinuesCheck = false;
+                            flag = false;
+                            isContinus = false;
+                            isRetry = false;
                             break;
                         default:
+                            flag = true;
                             System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                            choiceContinuesCheck =false;
                             break;
                     }
-                }
-            }while (flag);
-        }while (choiceContinuesCheck);
-
+                }while (flag);
+            }while (isContinus);
+            if (choice == 1 || choice == 2){
+                isRetry = AppUtils.isRetry(Options.SORT);
+            }
+        }while (isRetry);
     }
-//    public void edit() {
-//        List<Order> orderList = OrderServices.getCurrentList();
-//        boolean flag = false;
+    private void sortByPricesProductMenu(){
+        int choice;
+        boolean flag = false;
+        boolean isContinus = true;
+        boolean isRetry = false;
+        do {
+            do {
+                do {
+                    System.out.println("1.Sắp xếp theo giá tăng dần.");
+                    System.out.println("2.Sắp xếp theo giá giảm dần.");
+                    System.out.println("0.Quay lại.");
+                    System.out.print(">Chọn chức năng: ");
+                    choice = AppUtils.retryParseIntInput();
+                    switch (choice){
+                        case 1:
+                            sortByPricesIncreaseViews();
+                            break;
+                        case 2:
+                            sortByPricesDecreaseViews();
+                            break;
+                        case 0:
+                            flag = false;
+                            isContinus = false;
+                            isRetry = false;
+                            break;
+                        default:
+                            flag = true;
+                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                            break;
+                    }
+                }while (flag);
+            }while (isContinus);
+            if (choice == 1 || choice == 2){
+                isRetry = AppUtils.isRetry(Options.SORT);
+            }
+        }while (isRetry);
+    }
+    private void editMenu(){
+        System.out.println(">Quản lý sản phẩm.");
+        System.out.println("1.Sửa tên sản phẩm.");
+        System.out.println("2.Sửa số lượng sản phẩm.");
+        System.out.println("3.Sửa giá sản phẩm.");
+        System.out.println("0.Quay lại.");
+        System.out.print(">Chọn chức năng: ");
+    }
+    public void add(){
+        System.out.println(">Thêm sản phẩm.");
+        do {
+            long productID = System.currentTimeMillis() % 100000000;
+            String titles = titles(Options.ADD);
+            double prices = prices(Options.ADD);
+            int quantitys = quantitys(Options.ADD);
+            Instant atCreated = Instant.now();
+            Instant atUpdated = Instant.now();
+            productServices.add(new Product(productID,titles,quantitys,prices,atCreated,atUpdated));
+            System.out.println("Đã cập nhật sản phẩm thành công.");
+        }while (AppUtils.isRetry(Options.ADD));
+    }
+//    public void restoreProductRemoved(){
+//        System.out.println(">Khôi phục sản phẩm đã xóa.");
 //        boolean isRetry = false;
-//        //boolean isChoiceContinus = false;
-//        showOrderList();
-//        System.out.println(">Sửa thông tin hóa đơn khách hàng.");
+//        showProductList(Options.ADD,ProductServices.());
 //        do {
-//            System.out.print("Nhập mã ID hóa đơn: ");
-//            long orderID = Long.parseLong(scanner.nextLine());
-//            if (orderServices.isExistObject(orderID)) {
-//                do {
-//                    System.out.println(">Quản lý hóa đơn khách hàng.");
-//                    showOrder(orderServices.findObject(orderID));
-//                    System.out.println();
-//                    System.out.println("1.Sửa họ và tên.");
-//                    System.out.println("2.Sửa số điện thoại.");
-//                    System.out.println("3.Sửa địa chỉ.");
-//                    System.out.println("4.Sửa Email.");
-//                    System.out.println("0.Quay lại.");
-//                    System.out.print(">Chọn chức năng: ");
-//                    Order newOrder = new Order();
-//                    newOrder.setOrderID(orderID);
-//                    int choice = Integer.parseInt(scanner.nextLine());
-//                    switch (choice) {
-//                        case 1:
-//                            System.out.print("Nhập họ và tên: ");
-//                            String customerFullName = scanner.nextLine();
-//                            newOrder.setCustomerFullName(customerFullName);
-//                            break;
-//                        case 2:
-//                            System.out.print("Nhập số điện thoại: ");
-//                            String customerPhoneNumber = scanner.nextLine();
-//                            newOrder.setCustomerPhoneNumber(customerPhoneNumber);
-//                            break;
-//                        case 3:
-//                            System.out.print("Nhập địa chỉ: ");
-//                            String customerAddress = scanner.nextLine();
-//                            newOrder.setCustomerAddress(customerAddress);
-//                            break;
-//                        case 4:
-//                            System.out.print("Nhập Email: ");
-//                            String customerEmail = scanner.nextLine();
-//                            newOrder.setCustomerEmail(customerEmail);
-//                            break;
-//                        case 0:
-//                            //thoát chương trình, quay về menu trước đó
-//                            System.exit(5);
-//                            break;
-//                        default:
-//                            //trường hợp nhập sai lần 1
-//                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-//                            System.out.println("Bạn muốn tiếp tục?");
-//                            System.out.println("1.Tiếp tục.");
-//                            System.out.println("0.Quay lại.");
-//                            System.out.print(">Chọn chức năng: ");
-//                            int choiceDefault = Integer.parseInt(scanner.nextLine());
-//                            switch (choiceDefault) {
-//                                case 1:
-//                                    //quay về menu quản lý hóa đơn
-//                                    flag = true;
-//                                    break;
-//                                case 0:
-//                                    //quay về nhập ID
-//                                    flag = false; // thoát vòng lặp menu
-//                                    isRetry = true;
-//                                    break;
-//                                default:
-//                                    //chọn sai chức năng lần 2 thì thoát, quay về menu trước đó
-//                                    System.out.println("Chọn sai chức năng.");
-//                                    System.out.println("Thoát chương trình.");
-//                                    System.exit(3);
-//                            }
-//                            break;
-//                    }
-//                    if (choice == 1 || choice == 2 || choice == 3 || choice == 4) {
-//                        boolean isChoiceAgree = false;
-//                        flag = false;
-//                        //showOrder(newOrder);
-//                        do {
-//                            System.out.printf("Bạn có muốn thay đổi thông tin hóa đơn %d này?\n", orderServices.findObject(orderID).getOrderID());
-//                            System.out.println("1.Đồng ý.");
-//                            System.out.println("0.Quay lại.");
-//                            System.out.print(">Chọn chức năng: ");
-//                            int choiceAgrees = Integer.parseInt(scanner.nextLine());
-//                            switch (choiceAgrees){
-//                                case 1:
-//                                    orderServices.edit(newOrder);
-//                                    System.out.println("Đã cập nhật thành công!");
-//                                    break;
-//                                case 0:
-//                                    flag = true;
-//                                    break;
-//                                default:
-//                                    System.out.println("Chọn sai chức năng. Kiếm tra lại.");
-//                                    isChoiceAgree = true;
-//                                    break;
-//                            }
-//                        } while (isChoiceAgree);
-//                    }
-//                }while (flag);
-//            }
-//            else {
-//                System.out.println("Mã ID hóa đơn không tồn tại.");
-//                System.out.println("Bạn muốn tiếp tục?");
-//                System.out.println("1.Tiếp tục.");
-//                System.out.println("0.Quay lại.");
-//                System.out.print(">Chọn chức năng: ");
-//                int choiceContinus = Integer.parseInt(scanner.nextLine());
-//                switch (choiceContinus){
-//                    case 1:
-//                        isRetry = true;
-//                        break;
-//                    case 0:
-//                        System.exit(2);
-//                        break;
-//                    default:
-//                        System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-//                        System.out.println("Bạn muốn tiếp tục?");
-//                        System.out.println("1.Tiếp tục.");
-//                        System.out.println("0.Quay lại.");
-//                        System.out.print(">Chọn chức năng: ");
-//                        int choiceDefault = Integer.parseInt(scanner.nextLine());
-//                        switch (choiceDefault){
-//                            case 1:
-//                                isRetry = true;
-//                                break;
-//                            case 0:
-//                                //thoát quay lại menu cũ không thông báo
-//                                isRetry = false;
-//                                break;
-//                            default:
-//                                System.out.println("Chọn sai chức năng.");
-//                                System.out.println("Thoát chương trình.");
-//                                System.exit(4);
-//                        }
-//                        break;
-//                }
+//            System.out.print("Nhập mã ID sản phẩm: ");
+//            long productID = AppUtils.retryParseLongInput();
+//            if (productServices.isExistProductRemoved(productID)){
+//                Product productRemoved = productServices.findProductRemoved(productID);
+//                showProduct(productRemoved,Options.ADD);
+//                System.out.println("Bạn muốn khôi phục sản phẩm này?");
+//                if (AppUtils.isAcceptMenu()){
+//                    productServices.restoreProductRemoved(productID);
+//                    System.out.println("Đã cập nhật thành công.");
+//                    isRetry = AppUtils.isRetry(Options.ADD);
+//                }else
+//                    isRetry = false;
+//            }else{
+//                System.out.printf("Mã ID %d sản phẩm không tồn tại\n",productID);
+//                isRetry = AppUtils.isRetry(Options.ADD);
 //            }
 //        }while (isRetry);
 //    }
-    public void remove(){
-        System.out.println(">Xóa thông tin sản phẩm.");
-        showList();
-        boolean flag = false;
+    public void edit() {
+        boolean isRetry = false;
         do {
-            System.out.print("Nhập ID sản phẩm: ");
-            long productID = Long.parseLong(scanner.nextLine());
+            System.out.println(">Sửa thông tin sản phẩm");
+            showProductList(Options.EDIT,ProductServices.findAll());
+            System.out.print("Nhập mã ID sản phẩm: ");
+            long productID = AppUtils.retryParseLongInput();
             if (productServices.isExistObject(productID)){
                 Product product = productServices.findObject(productID);
-                System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
-                System.out.println("------------------");
-                System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
-                        product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
-                        DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
-                System.out.println("------------------");
-                System.out.printf("Bạn muốn xóa sản phẩm %s này?\n",product.getTitles());
-                System.out.println("1.Đồng ý.");
-                System.out.println("0.Quay lại.");
-                System.out.print(">Chọn chức năng: ");
-                int choice = Integer.parseInt(scanner.nextLine());
-                //boolean checkChoice = false;
-                switch (choice){
-                    case 1:
-                        productServices.remove(product);
-                        System.out.println("Đã xóa sản phẩm thành công!");
-                        break;
-                    case 0:
-                        break;
-                    default:
-                        System.out.println("Chọn sai chức năng!");
-                        System.out.println("Thoát chương trình!");
-                        break;
+                showProduct(product,Options.EDIT);
+                Product newProduct = new Product();
+                newProduct.setProductID(productID);
+                editMenu();
+                boolean flag = false;
+                int choice;
+                do {
+                    choice = AppUtils.retryParseIntInput();
+                    switch (choice){
+                        case 1:
+                            String titles = titles(Options.EDIT);
+                            newProduct.setTitles(titles);
+                            break;
+                        case 2:
+                            int quantitys = quantitys(Options.EDIT);
+                            newProduct.setQuantitys(quantitys);
+                            break;
+                        case 3:
+                            double prices = prices(Options.EDIT);
+                            newProduct.setPrices(prices);
+                            break;
+                        case 0:
+                            isRetry = false;
+                            flag = false;
+                            break;
+                        default:
+                            flag = true;
+                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                            System.out.print("Nhập lại: ");
+                    }
+                }while (flag);
+                if (choice == 1 || choice == 2 || choice == 3){
+                    System.out.println("Bạn có muốn cập nhật thông tin này?");
+                    boolean accept = AppUtils.isAcceptMenu();
+                    if (accept){
+                        productServices.edit(newProduct);
+                        System.out.println("Cập nhật thành công!");
+                        showProduct(productServices.findObject(newProduct.getProductID()),Options.SHOW);
+                    }
                 }
-            }else {
-                System.out.printf("Sản phẩm có mã ID %d không tồn tại.",productID);
-                System.out.println("Bạn muốn tiếp tục?");
-                System.out.println("1.Đồng ý.");
-                System.out.println("0.Quay lại.");
-                System.out.print(">Chọn chức năng: ");
-                int choice = Integer.parseInt(scanner.nextLine());
-                switch (choice){
-                    case 1:
-                        flag = true;
-                        break;
-                    case 0:
-                        break;
-                    default:
-                        System.out.println("Chọn sai chức năng!");
-                        System.out.println("Thoát chương trình!");
-                        System.exit(1);
-                        break;
-                }
+            }else{
+                System.out.println("Mã ID sản phẩm không tồn tại. Kiểm tra lại.");
+                isRetry = AppUtils.isRetry(Options.EDIT);
             }
-        }while (flag);
+
+        }while (isRetry);
     }
-    public void sortByNameAToZViews(){
+    public void remove(){
+        System.out.println(">Xóa sản phẩm.");
+        boolean isRetry = false;
+        do {
+            System.out.print("Nhập mã ID sản phẩm: ");
+            long productID = AppUtils.retryParseLongInput();
+            if (productServices.isExistObject(productID)){
+                Product product = productServices.findObject(productID);
+                showProduct(product,Options.SHOW);
+                System.out.println("Bạn muốn xóa sản phẩm này?");
+                if (AppUtils.isAcceptMenu()){
+                    productServices.remove(productID);
+                    System.out.println("Đã cập nhật thành công.");
+                }
+            } else if (productServices.isExistProductRemoved(productID)) {
+                Product product = productServices.findProductRemoved(productID);
+                showProduct(product,Options.SHOW);
+                if (AppUtils.isAcceptMenu()){
+                    productServices.deleteProductRemoved(product);
+                    System.out.println("Đã cập nhật thành công.");
+                }
+            } else{
+                System.out.println("Mã ID sản phẩm không tồn tại. Kiểm tra lại.");
+            }
+            isRetry = AppUtils.isRetry(Options.REMOVE);
+        }while (isRetry);
+    }
+    public void findProductMenu(){
+        boolean isRetry = false;
+        System.out.println(">Tìm kiếm sản phẩm.");
+        do {
+            System.out.println("1.Sản phẩm hiện đang tồn tại.");
+            System.out.println("2.Sản phẩm đã xóa.");
+            System.out.println("0.Quay lại.");
+            System.out.print(">Chọn chức năng: ");
+            int choice = AppUtils.retryParseIntInput();
+            switch (choice){
+                case 1:
+                    findExistProduct();
+                    break;
+                case 2:
+                    findRemovedProduct();
+                    break;
+                case 0:
+                    isRetry = false;
+                    break;
+                default:
+                    System.out.println("Nhập sai chức năng. Kiểm tra lại.");
+                    isRetry = AppUtils.isRetry(Options.FIND);
+                    break;
+            }
+            if (choice == 1 || choice == 2){
+                isRetry = AppUtils.isRetry(Options.FIND);
+            }
+        }while (isRetry);
+    }
+    public void findExistProduct(){
+        showProductList(Options.FIND,ProductServices.findAll());
+        System.out.print("Nhập mã ID sản phẩm: ");
+        long productID = AppUtils.retryParseLongInput();
+        if (productServices.isExistObject(productID)) {
+            showProduct(productServices.findObject(productID),Options.FIND);
+        }else
+            System.out.printf("Mã ID %d không tồn tại.\n",productID);
+    }
+    private void findRemovedProduct(){
+        showProductList(Options.FIND,ProductServices.findAllProductsRemoved());
+        System.out.print("Nhập mã ID sản phẩm: ");
+        long productID = AppUtils.retryParseLongInput();
+        if (productServices.isExistProductRemoved(productID)) {
+            showProduct(productServices.findProductRemoved(productID),Options.FIND);
+        }else
+            System.out.printf("Mã ID %d không tồn tại.\n",productID);
+    }
+    private void sortByNameAToZViews(){
         System.out.println(">Hiển thị danh sách sản phẩm theo thứ tự A -> Z.");
         List<Product> productList = productServices.sortByNameAToZ();
-        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
-        System.out.println("------------------");
-        for (Product product : productList){
-            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
-                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
-                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
-            System.out.println("------------------");
-        }
+        showProductList(Options.SORT,productList);
+//        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
+//        System.out.println("------------------");
+//        for (Product product : productList){
+//            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
+//                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
+//                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
+//            System.out.println("------------------");
+//        }
+//        System.out.println("Nhậpphím bất kì để tiếp tục.");
+//        scanner.nextLine();
     }
-    public void sortByNameZToAViews(){
+    private void sortByNameZToAViews(){
         System.out.println(">Hiển thị danh sách sản phẩm theo thứ tự Z -> A.");
         List<Product> productList = productServices.sortByNameZToA();
-        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
-        System.out.println("------------------");
-        for (Product product : productList){
-            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
-                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
-                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
-            System.out.println("------------------");
-        }
+        showProductList(Options.SORT,productList);
+//        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
+//        System.out.println("------------------");
+//        for (Product product : productList){
+//            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
+//                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
+//                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
+//            System.out.println("------------------");
+//        }
+//        System.out.println("Nhập 1 phím bất kì để tiếp tục.");
+//        scanner.nextLine();
     }
-    public void sortByPricesIncreaseViews(){
+    private void sortByPricesIncreaseViews(){
         System.out.println(">Hiển thị danh sách theo giá tăng dần.");
         List<Product> productList = productServices.sortByPricesIncrease();
-        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
-        System.out.println("------------------");
-        for (Product product : productList){
-            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
-                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
-                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
-            System.out.println("------------------");
-        }
+        showProductList(Options.SORT,productList);
+//        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
+//        System.out.println("------------------");
+//        for (Product product : productList){
+//            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
+//                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
+//                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
+//            System.out.println("------------------");
+//        }
+//        System.out.println("Nhập 1 phím bất kì để tiếp tục.");
+//        scanner.nextLine();
     }
-    public void sortByPricesDecreaseViews(){
+    private void sortByPricesDecreaseViews(){
         System.out.println(">Hiển thị danh sách theo giá giảm dần.");
         List<Product> productList = productServices.sortByPricesDecrease();
-        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
-        System.out.println("------------------");
-        for (Product product : productList){
-            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
-                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
-                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
-            System.out.println("------------------");
-        }
+        showProductList(Options.SORT,productList);
+//        System.out.printf("%s %s %s %s %s %s\n","ID", "Titles", "Quantitys", "Prices", "At created", "At updated");
+//        System.out.println("------------------");
+//        for (Product product : productList){
+//            System.out.printf("%d %s %d %f %s %s\n",product.getProductID(),product.getTitles(),product.getQuantitys(),
+//                    product.getPrices(),DateTimeUtil.formatIntanceToString(product.getAtCreated()),
+//                    DateTimeUtil.formatIntanceToString(product.getAtUpdated()));
+//            System.out.println("------------------");
+//        }
+//        System.out.println("Nhập 1 phím bất kì để tiếp tục.");
+//        scanner.nextLine();
     }
 }

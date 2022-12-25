@@ -1,8 +1,7 @@
 package project.shopping_system.services;
 
-import project.shopping_system.models.Account;
 import project.shopping_system.models.Order;
-import project.shopping_system.models.OrderItems;
+import project.shopping_system.models.Product;
 import project.shopping_system.utils.IOFile;
 
 import java.time.Instant;
@@ -12,9 +11,9 @@ import java.util.Comparator;
 import java.util.List;
 
 public class OrderServices implements AbstractServices<Order>{
-    private static String pathFile = "src/main/java/project/shopping_system/data/orders.csv";
+    private static String pathOrderFile = "src/main/java/project/shopping_system/data/orders.csv";
+    private static String pathOrderRemovedFile = "src/main/java/project/shopping_system/data/data_removed/orders_removed.csv";
     private static OrderServices instance;
-    private static List<Order> currentList;
     public OrderServices(){}
     public static OrderServices getInstance(){
         if (instance == null){
@@ -22,40 +21,32 @@ public class OrderServices implements AbstractServices<Order>{
         }
         return instance;
     }
-    static List<Order> findAll() {
-        List<String> stringsOrder = IOFile.readFile(pathFile);
+    public static List<Order> findAll() {
+        List<String> stringsOrder = IOFile.readFile(pathOrderFile);
         List<Order> orderList = new ArrayList<>();
         for (String strOrder : stringsOrder){
             orderList.add(Order.parseOrder(strOrder));
         }
         return orderList;
     }
-    static {
-        currentList = findAll();
+    public static List<Order> findAllOrdersRemoved(){
+        List<String> stringsOrderRemove = IOFile.readFile(pathOrderRemovedFile);
+        List<Order> orderList = new ArrayList<>();
+        for (String strOrder : stringsOrderRemove){
+            orderList.add(Order.parseOrder(strOrder));
+        }
+        return orderList;
     }
-
-    public static List<Order> getCurrentList() {
-        return currentList;
-    }
-
-    public static void setCurrentList(List<Order> currentList) {
-        OrderServices.currentList = currentList;
-    }
-
     @Override
     public void add(Order newObject) {
-        List<Order> orderList = currentList;
+        List<Order> orderList = findAll();
         orderList.add(newObject);
-        IOFile.writeFile(orderList,pathFile);
+        IOFile.writeFile(orderList, pathOrderFile);
     }
-
     @Override
     public void edit(Order order) {
-        List<Order> orderList = currentList;
+        List<Order> orderList = findAll();
         for (Order oldOrder : orderList){
-            //(long orderID, String customerFullName,
-            //                 String customerPhoneNumber, String customerAddress, String customerEmail,
-            //                 double grandTotal,Instant atCreated, Instant atUpdated)
             if (oldOrder.getOrderID() == order.getOrderID()){
                 Instant atUpdated = Instant.now();
                 String customerFullName = order.getCustomerFullName();
@@ -70,43 +61,64 @@ public class OrderServices implements AbstractServices<Order>{
                 String customerEmail = order.getCustomerEmail();
                 if(customerEmail!=null && !customerEmail.trim().isEmpty())
                     oldOrder.setCustomerEmail(customerEmail);
+                double grandTotal = order.getGrandTotal();
+                if (grandTotal > 0)
+                    oldOrder.setGrandTotal(grandTotal);
                 oldOrder.setAtUpdated(atUpdated);
                 break;
             }
         }
-        IOFile.writeFile(orderList,pathFile);
+        IOFile.writeFile(orderList, pathOrderFile);
     }
-
     @Override
-    public void remove(Order order) {
-        List<Order> orderList = currentList;
-        orderList.remove(order);
-        IOFile.writeFile(orderList,pathFile);
+    public void remove(long orderID) {
+        List<Order> orderList = findAll();
+        List<Order> orderRemovedList = findAllOrdersRemoved();
+        for (Order order : orderList){
+            orderList.remove(order);
+            orderRemovedList.add(order);
+            break;
+        }
+        IOFile.writeFile(orderList, pathOrderFile);
+        IOFile.writeFile(orderRemovedList, pathOrderRemovedFile);
     }
-
     @Override
     public Order findObject(long id) {
-        List<Order> orderList = currentList;
+        List<Order> orderList = findAll();
         for (Order order : orderList){
             if (order.getOrderID() == id)
                 return order;
         }
         return null;
     }
-
+    public Order findRemovedObject(long id) {
+        List<Order> orderList = findAllOrdersRemoved();
+        for (Order order : orderList){
+            if (order.getOrderID() == id)
+                return order;
+        }
+        return null;
+    }
     @Override
     public boolean isExistObject(long id) {
-        List<Order> orderList = currentList;
+        List<Order> orderList = findAll();
         for (Order order : orderList){
             if (order.getOrderID() == id)
                 return true;
         }
         return false;
     }
-
+    public boolean isRemoveObject(long id) {
+        List<Order> orderList = findAllOrdersRemoved();
+        for (Order order : orderList){
+            if (order.getOrderID() == id)
+                return true;
+        }
+        return false;
+    }
     @Override
     public List<Order> sortByNameAToZ() {
-        List<Order> orderList = currentList;
+        List<Order> orderList = findAll();
         Collections.sort(orderList, new Comparator<Order>() {
             @Override
             public int compare(Order order1, Order order2) {
@@ -120,10 +132,9 @@ public class OrderServices implements AbstractServices<Order>{
         });
         return orderList;
     }
-
     @Override
     public List<Order> sortByNameZToA() {
-        List<Order> orderList = currentList;
+        List<Order> orderList = findAll();
         Collections.sort(orderList, new Comparator<Order>() {
             @Override
             public int compare(Order order1, Order order2) {
@@ -137,15 +148,92 @@ public class OrderServices implements AbstractServices<Order>{
         });
         return orderList;
     }
-    public List<Order> sortByOrderIDIncrease(List<Order> orderList){
+
+    public List<Order> sortByNameZToAOrderRemoved() {
+        List<Order> orderList = findAllOrdersRemoved();
         Collections.sort(orderList, new Comparator<Order>() {
             @Override
             public int compare(Order order1, Order order2) {
-                if (order1.getOrderID() > order2.getOrderID()){
+                if (order1.getCustomerFullName().compareTo(order1.getCustomerFullName())<0){
                     return 1;
-                } else if (order1.getOrderID()==order2.getOrderID()) {
+                } else if (order1.getCustomerFullName().compareTo(order1.getCustomerFullName())==0) {
                     return 0;
                 }else
+                    return -1;
+            }
+        });
+        return orderList;
+    }
+    public List<Order> sortByNameAToZOrderRemoved() {
+        List<Order> orderList = findAllOrdersRemoved();
+        Collections.sort(orderList, new Comparator<Order>() {
+            @Override
+            public int compare(Order order1, Order order2) {
+                if (order1.getCustomerFullName().compareTo(order1.getCustomerFullName())>0){
+                    return 1;
+                } else if (order1.getCustomerFullName().compareTo(order1.getCustomerFullName())==0) {
+                    return 0;
+                }else
+                    return -1;
+            }
+        });
+        return orderList;
+    }
+    public List<Order> sortByGrandTotalIncrease(){
+        List<Order> orderList = findAll();
+        Collections.sort(orderList, new Comparator<Order>() {
+            @Override
+            public int compare(Order order1, Order product2) {
+                if (order1.getGrandTotal()>order1.getGrandTotal()){
+                    return 1;
+                } else if (order1.getGrandTotal()==order1.getGrandTotal()) {
+                    return 0;
+                }else
+                    return -1;
+            }
+        });
+        return orderList;
+    }
+    public List<Order> sortByGrandTotalDecrease(){
+        List<Order> orderList = findAll();
+        Collections.sort(orderList, new Comparator<Order>() {
+            @Override
+            public int compare(Order order1, Order product2) {
+                if (order1.getGrandTotal()<order1.getGrandTotal()){
+                    return 1;
+                } else if (order1.getGrandTotal()==order1.getGrandTotal()) {
+                    return 0;
+                }else
+                    return -1;
+            }
+        });
+        return orderList;
+    }
+    public List<Order> sortByGrandTotalIncreaseOrderRemoved(){
+        List<Order> orderList = findAllOrdersRemoved();
+        Collections.sort(orderList, new Comparator<Order>() {
+            @Override
+            public int compare(Order order1, Order product2) {
+                if (order1.getGrandTotal()>order1.getGrandTotal()){
+                    return 1;
+                } else if (order1.getGrandTotal()==order1.getGrandTotal()) {
+                    return 0;
+                }else
+                    return -1;
+            }
+        });
+        return orderList;
+    }
+    public List<Order> sortByGrandTotalDecreaseOrderRemoved() {
+        List<Order> orderList = findAllOrdersRemoved();
+        Collections.sort(orderList, new Comparator<Order>() {
+            @Override
+            public int compare(Order order1, Order product2) {
+                if (order1.getGrandTotal() < order1.getGrandTotal()) {
+                    return 1;
+                } else if (order1.getGrandTotal() == order1.getGrandTotal()) {
+                    return 0;
+                } else
                     return -1;
             }
         });

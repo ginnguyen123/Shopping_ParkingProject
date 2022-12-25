@@ -8,6 +8,7 @@ public class Order {
     private String customerPhoneNumber;
     private String customerAddress;
     private String customerEmail;
+    private long userID;
     private Instant atCreated;
     private Instant atUpdated;
     private double grandTotal;
@@ -15,7 +16,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(long orderID, String customerFullName,
+    public Order(long userID,long orderID, String customerFullName,
                  String customerPhoneNumber, String customerAddress, String customerEmail,
                  double grandTotal,Instant atCreated, Instant atUpdated) {
         this.orderID = orderID;
@@ -26,20 +27,30 @@ public class Order {
         this.grandTotal = grandTotal;
         this.atCreated = atCreated;
         this.atUpdated = atUpdated;
+        this.userID = userID;
     }
 
     public static Order parseOrder(String raw){
         String[] fields = raw.split(",");
-        long orderID = Long.parseLong(fields[0]);
-        String customerFullName = fields[1];
-        String customerPhoneNumber = fields[2];
-        String customerAddress = fields[3];
-        String customerEmail = fields[4];
-        double grandTotal = Double.parseDouble(fields[5]);
-        Instant atCreated = Instant.parse(fields[6]);
-        Instant atUpdated = Instant.parse(fields[7]);
-        return new Order(orderID,customerFullName,customerPhoneNumber, customerAddress,customerEmail,
+        long userID = Long.parseLong(fields[0]);
+        long orderID = Long.parseLong(fields[1]);
+        String customerFullName = fields[2];
+        String customerPhoneNumber = fields[3];
+        String customerAddress = fields[4];
+        String customerEmail = fields[5];
+        double grandTotal = Double.parseDouble(fields[6]);
+        Instant atCreated = Instant.parse(fields[7]);
+        Instant atUpdated = Instant.parse(fields[8]);
+        return new Order(userID,orderID,customerFullName,customerPhoneNumber, customerAddress,customerEmail,
                 grandTotal,atCreated, atUpdated);
+    }
+
+    public long getUserID() {
+        return userID;
+    }
+
+    public void setUserID(long userID) {
+        this.userID = userID;
     }
 
     public Instant getAtCreated() {
@@ -110,7 +121,7 @@ public class Order {
     public String toString() {
         //(long orderID, String customerFullName,
         //                 String customerPhoneNumber, String customerAddress, String customerEmail, double grandTotal)
-        return String.format("%d,%s,%s,%s,%s,%f,%s,%s\n",
-                orderID,customerFullName,customerPhoneNumber,customerAddress,customerEmail,grandTotal,atCreated,atUpdated);
+        return String.format("%d,%d,%s,%s,%s,%s,%f,%s,%s\n",
+                userID,orderID,customerFullName,customerPhoneNumber,customerAddress,customerEmail,grandTotal,atCreated,atUpdated);
     }
 }
