@@ -64,8 +64,8 @@ public class OrderViewLauncher {
     public static void  oderLaunchs (AccountTypes accountTypes){
         boolean isReturn = true;
         int options;
-        do {
-            if (accountTypes == AccountTypes.ADMIN){
+        if (accountTypes == AccountTypes.ADMIN){
+            do {
                 adminManagerMenuOrder();
                 try{
                     options = Integer.parseInt(scanner.nextLine());
@@ -106,25 +106,24 @@ public class OrderViewLauncher {
                     System.out.println(">Nhập sai cú pháp. Kiểm tra lại.");
                     System.out.print("Nhập lại: ");
                 }
-            }
         }while (isReturn);
+        }
         if (accountTypes == AccountTypes.USER){
-            userManagerMenuOrder();
             do {
+                userManagerMenuOrder();
                 try{
                     options = Integer.parseInt(scanner.nextLine());
                     switch (options){
                         case SHOW_ORDER:
-//                            orderViews.showOrderList(OrderServices.getCurrentList(),Options.SHOW);
+                            orderViews.showOrderList(OrderServices.findAll(),Options.SHOW);
                             break;
                         case ADD_ORDER:
-//                            orderViews.add(account.getAccountID());
+                            orderViews.add(47489580);
                             break;
                         case EDIT_ODER:
-//                            orderViews.edit();
+                            orderViews.edit();
                             break;
                         case REMOVE_ORDER:
-                            //in hóa đơn = xóa
                             orderViews.remove();
                             break;
                         case FIND_ORDER:

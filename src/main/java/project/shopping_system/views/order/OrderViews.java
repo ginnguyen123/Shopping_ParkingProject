@@ -36,10 +36,15 @@ public class OrderViews {
         }
         if (orderServices.isExistObject(order.getOrderID())){
             orderItemViews.showOrderItemExistList(order.getOrderID());
-        }else
+        }
+        if (orderServices.isRemoveObject(order.getOrderID()) && options == Options.STATISTICAL) {
+            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
+                    "Address","Email","Grand total","ID employee","At created","At updated");
             orderItemViews.showOrderItemRemovedList(order.getOrderID());
-        if (options == Options.SHOW || options == Options.FIND || options == Options.EDIT
-                && (orderItemViews.showOrderItemExistList(order.getOrderID()))==false || orderItemViews.showOrderItemRemovedList(order.getOrderID()) == false) {
+
+        }
+        if (options == Options.SHOW || options == Options.FIND || options == Options.EDIT && options != Options.STATISTICAL
+                && (orderItemViews.showOrderItemExistList(order.getOrderID()))==false ) {//|| orderItemViews.showOrderItemRemovedList(order.getOrderID()) == false
             System.out.println("1.Thêm sản phẩm\t\t2.In hóa đơn\t\t3.Sửa hóa đơn\t\t0.Quay lại");
             System.out.print(">Chọn chức năng: ");
             int choice = AppUtils.retryParseIntInput();
@@ -63,7 +68,7 @@ public class OrderViews {
     }
     public void showOrderList(List<Order> orderList, Options options){
         int count = 0;
-        if (options == Options.SHOW || options == Options.EDIT || options == Options.REMOVE || options == Options.STATISTICAL) {
+        if (options == Options.SHOW || options == Options.EDIT || options == Options.REMOVE || options == Options.STATISTICAL || options == Options.SORT) {
             System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
                     "Address","Email","Grand total","ID employee","At created","At updated");
             for (Order order : orderList){
@@ -77,25 +82,26 @@ public class OrderViews {
         boolean isContinus = false;
         if (options == Options.SORT || options == Options.SHOW || options == Options.STATISTICAL || options == Options.REMOVE){
             do {
-                if (count == 0 && (options != Options.REMOVE||options == Options.SORT || options == Options.SHOW || options == Options.STATISTICAL)){
+                if (count == 0){
                     System.out.println("0.Quay lại.");
                     System.out.print(">Chọn chức năng: ");
                     int choice = AppUtils.retryParseIntInput();
                     switch (choice){
                         case 0:
+                            isContinus = false;
                             break;
                         default:
                             isContinus = true;
                             System.out.println("Chọn sai chức năng.");
                     }
                 }
-                else {
+                if (options != Options.REMOVE && options != Options.STATISTICAL){
                     System.out.println("1.Xem chi tiết hóa đơn.\t\t\t\t0.Quay lại.");
                     System.out.print(">Chọn chức năng: ");
                     int choice = AppUtils.retryParseIntInput();
                     switch (choice){
                         case 1:
-                            findOrder(orderList);
+                            findOrder(orderList, options);
                             break;
                         case 0:
                             isContinus = false;
@@ -234,11 +240,12 @@ public class OrderViews {
                     System.out.println("Nhập sai chức năng. Kiểm tra lại.");
                     break;
             }
-            if (choice == 1 || choice == 2 || choice == 3 || choice == 4){
+            if ((choice == 1 || choice == 2 || choice == 3 || choice == 4) && choice != 5){
                 System.out.println("Bạn muốn cập nhập thông tin mới?");
                 boolean isAccept = AppUtils.isAcceptMenu();
                 if (isAccept){
                     orderServices.edit(newOrder);
+                    System.out.println("Đã cập nhật thành công!");
                 }
             }
         }else {
@@ -316,11 +323,11 @@ public class OrderViews {
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
                     break;
             }
-            if (choice == 1 || choice == 2)
+            if (choice != 1 && choice != 2 && choice !=0)
                 isRetry = AppUtils.isRetry(Options.FIND);
         }while (isRetry);
     }
-    public void findOrder(List<Order> orderList){
+    public void findOrder(List<Order> orderList, Options options){
         showOrderList(orderList, Options.FIND);
         boolean isContinus = false;
         do {
@@ -330,10 +337,12 @@ public class OrderViews {
                 Order order = orderServices.findObject(orderID);
                 showOrderDetail(order,Options.SHOW);
 //                showOrderDetail(orderServices.findObject(orderID),Options.SHOW);
-            } else if (orderServices.isRemoveObject(orderID)) {
+            } else if (orderServices.isRemoveObject(orderID) && options == Options.STATISTICAL) {
                 orderItemViews.showOrderItemRemovedList(orderID);
-                Order order = orderServices.findRemovedObject(orderID);
-                showOrderDetail(order,Options.STATISTICAL);
+                System.out.println("Nhập phím bất kì để tiếp tục!");
+                String anyKey = scanner.nextLine();
+                //Order order = orderServices.findRemovedObject(orderID);
+                //showOrderDetail(order,Options.STATISTICAL);
 //                showOrderDetail(orderServices.findRemovedObject(orderID),Options.STATISTICAL);
             } else{
                 System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
@@ -343,8 +352,7 @@ public class OrderViews {
 
     }
     public void findExistOrder(){
-        System.out.println(">Menu tìm kiếm hóa đơn.");
-        showOrderList(OrderServices.findAll(),Options.FIND);
+        showOrderList(OrderServices.findAll(),Options.STATISTICAL);
         System.out.print("Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isExistObject(orderID)){
@@ -357,7 +365,7 @@ public class OrderViews {
         System.out.print("Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isRemoveObject(orderID)){
-            showOrderDetail(orderServices.findRemovedObject(orderID),Options.FIND);
+            showOrderDetail(orderServices.findRemovedObject(orderID),Options.STATISTICAL);
             //xem chi tiết hóa đơn, orderItemViews
         }else
             System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
@@ -375,9 +383,11 @@ public class OrderViews {
             switch (choice){
                 case 1:
                     sortExistOrderMenu();
+                    isRetry = false;
                     break;
                 case 2:
                     sortRemovedOrderMenu();
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
@@ -386,8 +396,6 @@ public class OrderViews {
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
                     break;
             }
-            if (choice != 0)
-                isRetry = AppUtils.isRetry(Options.SORT);
         }while (isRetry);
 
     }
@@ -404,23 +412,24 @@ public class OrderViews {
             switch (choice){
                 case 1:
                     sortByGrandTotalOrderMenu();
+                    isRetry = false;
                     break;
                 case 2:
                     sortByCustomerFullNameOrderMenu();
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
                     break;
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    System.out.print("Nhập lại: ");
                     break;
             }
-            if (choice != 0)
-                isRetry = AppUtils.isRetry(Options.SORT);
         }while (isRetry);
     }
     private void sortRemovedOrderMenu(){
-        boolean isRetry = true;
+        boolean isRetry = false;
         int choice;
         do {
             System.out.println("Menu sắp xếp hóa đơn.");
@@ -432,23 +441,24 @@ public class OrderViews {
             switch (choice){
                 case 1:
                     sortByGrandTotalOrderRemovedMenu();
+                    isRetry = false;
                     break;
                 case 2:
                     sortByCustomerFullNameOrderRemoveMenu();
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
                     break;
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    isRetry = true;
                     break;
             }
-            if (choice != 0)
-                isRetry = AppUtils.isRetry(Options.SORT);
         }while (isRetry);
     }
     private void sortByGrandTotalOrderRemovedMenu(){
-        boolean isRetry = true;
+        boolean isRetry = false;
         int choice;
         do {
             System.out.println(">Sắp xếp theo tổng tiền hóa đơn");
@@ -459,20 +469,22 @@ public class OrderViews {
             choice = AppUtils.retryParseIntInput();
             switch (choice){
                 case 1:
-                    showOrderList(orderServices.sortByGrandTotalIncreaseOrderRemoved(),Options.SORT);
+                    showOrderList(orderServices.sortByGrandTotalIncreaseOrderRemoved(),Options.STATISTICAL);
+                    isRetry = false;
                     break;
                 case 2:
-                    showOrderList(orderServices.sortByGrandTotalDecreaseOrderRemoved(),Options.SORT);
+                    showOrderList(orderServices.sortByGrandTotalDecreaseOrderRemoved(),Options.STATISTICAL);
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
                     break;
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra laị.");
+                    System.out.print(">Nhập lại: ");
+                    isRetry = true;
                     break;
             }
-            if(choice!=0)
-                isRetry = AppUtils.isRetry(Options.SORT);
         }while (isRetry);
     }
     private void sortByCustomerFullNameOrderRemoveMenu(){
@@ -487,10 +499,12 @@ public class OrderViews {
             choice = AppUtils.retryParseIntInput();
             switch (choice){
                 case 1:
-                    showOrderList(orderServices.sortByNameAToZOrderRemoved(),Options.SORT);
+                    showOrderList(orderServices.sortByNameAToZOrderRemoved(),Options.STATISTICAL);
+                    isRetry = false;
                     break;
                 case 2:
-                    showOrderList(orderServices.sortByNameZToAOrderRemoved(),Options.SORT);
+                    showOrderList(orderServices.sortByNameZToAOrderRemoved(),Options.STATISTICAL);
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
@@ -499,8 +513,6 @@ public class OrderViews {
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
                     break;
             }
-            if (choice != 0)
-                isRetry = AppUtils.isRetry(Options.SORT);
         }while (isRetry);
     }
     private void sortByCustomerFullNameOrderMenu(){
@@ -516,44 +528,48 @@ public class OrderViews {
             switch (choice){
                 case 1:
                     showOrderList(orderServices.sortByNameAToZ(),Options.SORT);
+                    isRetry = false;
                     break;
                 case 2:
                     showOrderList(orderServices.sortByNameZToA(),Options.SORT);
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
                     break;
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    System.out.print("Nhập lại: ");
                     break;
             }
-            if (choice != 0)
-                isRetry = AppUtils.isRetry(Options.SORT);
         }while (isRetry);
     }
     private void sortByGrandTotalOrderMenu(){
         boolean isRetry = false;
         int choice;
-        do {
             System.out.println(">Sắp xếp theo tổng tiền hóa đơn");
             System.out.println("1.Sắp xếp theo tổng tiền tăng dần.");
             System.out.println("2.Sắp xếp theo tổng tiền giảm dần.");
             System.out.println("0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
+        do {
             choice = AppUtils.retryParseIntInput();
             switch (choice){
                 case 1:
                     showOrderList(orderServices.sortByGrandTotalIncrease(),Options.SORT);
+                    isRetry = false;
                     break;
                 case 2:
                     showOrderList(orderServices.sortByGrandTotalDecrease(),Options.SORT);
+                    isRetry = false;
                     break;
                 case 0:
                     isRetry = false;
                     break;
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra laị.");
-                    isRetry = AppUtils.isRetry(Options.SORT);
+                    System.out.print(">Nhập lại: ");
+                    isRetry = true;
                     break;
             }
         }while (isRetry);

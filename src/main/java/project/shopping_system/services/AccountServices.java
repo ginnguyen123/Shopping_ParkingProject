@@ -13,7 +13,6 @@ import java.util.List;
 public class AccountServices implements AbstractServices<Account> {
     private static String pathFile = "src/main/java/project/shopping_system/data/accounts.csv";
     private static AccountServices instance;
-    private static List<Account> currentList;
     public AccountServices(){}
     public static AccountServices getInstance(){
         if (instance == null){
@@ -64,15 +63,15 @@ public class AccountServices implements AbstractServices<Account> {
                 String fullName = account.getFullName();
                 if (fullName!=null && !fullName.trim().isEmpty())
                     oldAccount.setFullName(fullName);
-                String phoneNumbers = account.getPhoneNumbers();
-                if (phoneNumbers!=null && !phoneNumbers.trim().isEmpty())
-                    oldAccount.setPhoneNumbers(phoneNumbers);
-                String email = account.getEmail();
-                if (email!=null && !email.trim().isEmpty())
-                    oldAccount.setEmail(email);
-                String address = account.getAddress();
-                if (address!=null && !address.trim().isEmpty())
-                    oldAccount.setAddress(address);
+//                String phoneNumbers = account.getPhoneNumbers();
+//                if (phoneNumbers!=null && !phoneNumbers.trim().isEmpty())
+//                    oldAccount.setPhoneNumbers(phoneNumbers);
+//                String email = account.getEmail();
+//                if (email!=null && !email.trim().isEmpty())
+//                    oldAccount.setEmail(email);
+//                String address = account.getAddress();
+//                if (address!=null && !address.trim().isEmpty())
+//                    oldAccount.setAddress(address);
                 oldAccount.setAtUpdated(atUpdated);
                 break;
             }

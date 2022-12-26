@@ -22,7 +22,5 @@ public class Main {
 //        orderViews.orderActionsMenu(Options.ADD, 3175039);
         //orderViews.edit();
         OrderViewLauncher.oderLaunchs(AccountTypes.ADMIN);
-
-
     }
 }

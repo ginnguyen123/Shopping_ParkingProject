@@ -14,7 +14,7 @@ public class AccountViewLauchers {
     private static final int RETURN = 6;
     private static final int EXIT = 0;
     private static final AccountViews accountViews = new AccountViews();
-    public static void accountManager(){
+    private static void accountManager(){
         System.out.println(">Quản lý tài khoản.");
         System.out.println("1.Hiển thị danh sách tài khoản.");
         System.out.println("2.Thêm tài khoản.");
@@ -39,6 +39,7 @@ public class AccountViewLauchers {
                         accountViews.addUser();
                         break;
                     case EDIT:
+
                         break;
                     case REMOVE:
                         break;

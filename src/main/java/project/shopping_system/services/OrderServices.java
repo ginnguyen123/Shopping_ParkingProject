@@ -75,9 +75,11 @@ public class OrderServices implements AbstractServices<Order>{
         List<Order> orderList = findAll();
         List<Order> orderRemovedList = findAllOrdersRemoved();
         for (Order order : orderList){
-            orderList.remove(order);
-            orderRemovedList.add(order);
-            break;
+            if (order.getOrderID() == orderID){
+                orderRemovedList.add(order);
+                orderList.remove(order);
+                break;
+            }
         }
         IOFile.writeFile(orderList, pathOrderFile);
         IOFile.writeFile(orderRemovedList, pathOrderRemovedFile);

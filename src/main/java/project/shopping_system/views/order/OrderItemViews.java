@@ -40,8 +40,8 @@ public class OrderItemViews {
             }
         }
         if (count == 0){
-            boolean isContinus = true;
-//            System.out.println(">Danh sách hóa đơn trống!");
+//            boolean isContinus = true;
+            System.out.println(">Danh sách hóa đơn trống!");
 //            System.out.println("1.Thêm sản phẩm\t\t\t\t0.Quay lại.");
 //            System.out.print(">Chọn chức năng: ");
 //            do {
@@ -66,21 +66,26 @@ public class OrderItemViews {
         List<OrderItems> orderItemsList = OrderItemServices.findAllOrderItemsRemove();
         int count = 0;
         //(long orderItemsID,  int quantitis,double prices,long orderID, long productID)
-        System.out.printf("%s %s %s %s %s\n","ID","Titles","Quantitis","Prices","Totals");
+        //System.out.printf("%s %s %s %s %s\n","ID","Titles","Quantitis","Prices","Totals");
         for (OrderItems orderItems : orderItemsList){
             if (orderItems.getOrderID() == removedOrderID){
-                count += count;
-                Product product = productServices.findObject(orderItems.getProductID());
-                System.out.printf("%s %s %s %s %s\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
-                        orderItems.getPrices(),orderItems.getTotals());
+                ++count;
+                if (count!=0){
+                    Product product = productServices.findProductRemoved(orderItems.getProductID());
+                    System.out.printf("%s %s %s %s %s\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
+                            orderItems.getPrices(),orderItems.getTotals());
+                }
             }
         }
         if (count == 0){
             System.out.println(">Danh sách hóa đơn trống");
+            System.out.println(">Nhập phím bất kì để tiếp tục.");
+            String anyPush = scanner.nextLine();
             return false;
         }
-        else
+        else{
             return true;
+        }
     }
     public void add(long orderID) {
         boolean isRetry;
@@ -174,6 +179,7 @@ public class OrderItemViews {
                     System.out.println("1.Thay đổi số lượng");
                     System.out.println("2.Xóa mục sản phẩm.");
                     System.out.println("0.Quay lại.");
+                    System.out.print(">Chọn chức năng: ");
                     choice = AppUtils.retryParseIntInput();
                     switch (choice){
                         case 1:

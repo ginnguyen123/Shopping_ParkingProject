@@ -7,9 +7,9 @@ public class Account {
     private String userName;
     private String passWord;
     private String fullName;
-    private String phoneNumbers;
-    private String email;
-    private String address;
+//    private String phoneNumbers;
+//    private String email;
+//    private String address;
     private AccountTypes accountTypes;
     private Instant atCreated;
     private Instant atUpdated;
@@ -17,15 +17,14 @@ public class Account {
     public Account() {
     }
 
-    public Account(long accountID, String userName, String passWord, String fullName, String phoneNumbers, String email,
-                   String address, AccountTypes accountTypes, Instant atCreated, Instant atUpdated) {
+    public Account(long accountID, String userName, String passWord, String fullName, AccountTypes accountTypes, Instant atCreated, Instant atUpdated) {
         this.accountID = accountID;
         this.userName = userName;
         this.passWord = passWord;
         this.fullName = fullName;
-        this.phoneNumbers = phoneNumbers;
-        this.email = email;
-        this.address = address;
+//        this.phoneNumbers = phoneNumbers;
+//        this.email = email;
+//        this.address = address;
         this.accountTypes = accountTypes;
         this.atCreated = atCreated;
         this.atUpdated = atUpdated;
@@ -38,14 +37,13 @@ public class Account {
         String userName = fields[1];
         String passWord = fields[2];
         String fullName = fields[3];
-        String phoneNumbers = fields[4];
-        String email = fields[5];
-        String address = fields[6];
-        AccountTypes accountTypes = AccountTypes.getAccountTypes(fields[7]);
-        Instant atCreated = Instant.parse(fields[8]);
-        Instant atUpdated = Instant.parse(fields[9]);
-        return new Account(accountID, userName, passWord,fullName,phoneNumbers,
-                email,address,accountTypes,atCreated,atUpdated);
+//        String phoneNumbers = fields[4];
+//        String email = fields[5];
+//        String address = fields[6];
+        AccountTypes accountTypes = AccountTypes.getAccountTypes(fields[4]);
+        Instant atCreated = Instant.parse(fields[5]);
+        Instant atUpdated = Instant.parse(fields[6]);
+        return new Account(accountID, userName, passWord,fullName,accountTypes,atCreated,atUpdated);
     }
 
     public long getAccountID() {
@@ -80,29 +78,29 @@ public class Account {
         this.fullName = fullName;
     }
 
-    public String getPhoneNumbers() {
-        return phoneNumbers;
-    }
+//    public String getPhoneNumbers() {
+//        return phoneNumbers;
+//    }
+//
+//    public void setPhoneNumbers(String phoneNumbers) {
+//        this.phoneNumbers = phoneNumbers;
+//    }
 
-    public void setPhoneNumbers(String phoneNumbers) {
-        this.phoneNumbers = phoneNumbers;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
+//    public String getEmail() {
+//        return email;
+//    }
+//
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
+//
+//    public String getAddress() {
+//        return address;
+//    }
+//
+//    public void setAddress(String address) {
+//        this.address = address;
+//    }
 
     public AccountTypes getAccountTypes() {
         return accountTypes;
@@ -132,8 +130,7 @@ public class Account {
     public String toString() {
         //(long accountID, String userName, String passWord, String fullName, String phoneNumbers, String email,
         //                   String address, AccountTypes accountTypes, Instant atCreated, Instant atUpdated)
-        return String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                accountID,userName,passWord,fullName,phoneNumbers,
-                email,address,accountTypes.getValue(),atCreated,atUpdated);
+        return String.format("%d,%s,%s,%s,%s,%s,%s\n",
+                accountID,userName,passWord,fullName,accountTypes.getValue(),atCreated,atUpdated);
     }
 }
