@@ -92,16 +92,19 @@ public class OrderItemViews {
         double totals = 0;
         Order order = orderServices.findObject(orderID);
         productViews.showProductList(Options.ADD, ProductServices.findAll());
+        //
             System.out.print("Nhập mã ID sản phẩm: ");
             long productID = AppUtils.retryParseLongInput();
             if (productServices.isExistObject(productID)) {
                 Product product = productServices.findObject(productID);
                 int quantitis = quantitisOrderItemInput(productID); // nhập đúng số lượng =>set lại số lượng product trong list nhưng k ghi xuống
                 if (quantitis == -1){
+                    //System.out.println("Số lượng đã hết! Nhập lại mã sản phẩm khác.");
                     isRetry = true;
                 }else {
+                    // nếu sản phầm còn hàng
                     if (orderItemServices.isExistOrderItems(orderID, productID)) {
-                        System.out.println("orderItem đã tồn tại trên order trước đó.");
+                        //System.out.println("orderItem đã tồn tại trên order trước đó.");
                         OrderItems orderItems = orderItemServices.findOrderItems(orderID, productID); // orderItems đã có trước đó trên order
                         orderItems.setQuantitis(orderItems.getQuantitis() + quantitis);
                         totals = (double) quantitis * product.getPrices();
@@ -115,7 +118,7 @@ public class OrderItemViews {
                         }
 //                        OrderItemServices.setCurrentOrderItemsList(orderItemsList);
                     } else {
-                        System.out.println("orderItem không tồn tại trước đó. orderItem được tạo mới!");
+                        //System.out.println("orderItem không tồn tại trước đó. orderItem được tạo mới!");
                         long orderItemID = System.currentTimeMillis() % 100000000;
                         Product product1 = productServices.findObject(productID);
                         double prices = product1.getPrices();
@@ -157,7 +160,6 @@ public class OrderItemViews {
                             break;
                         }
                     }
-
                     return quantitis;
                 }
             }while (true);
@@ -208,7 +210,7 @@ public class OrderItemViews {
 
     private void editQuantitis(long orderItemID){
         System.out.print("Nhập số lượng muốn thay đổi: ");
-        int quantitis = AppUtils.retryParseIntInput();
+        int quantitis = AppUtils.retryParseIntInput(); // số lượng nhập vào
         if (quantitis<=0){
             System.out.println("Nhập số lượng cần lớn hơn 0. Kiểm tra lại.");
         }else {
@@ -217,10 +219,11 @@ public class OrderItemViews {
             Product product = productServices.findObject(productID);
             Order order = orderServices.findObject(orderItems.getOrderID());
             System.out.printf("Bạn muốn thay đổi số lượng %d sản phẩm thành %d sản phẩm?\n",orderItems.getQuantitis(),quantitis);
-            int deltaQuantitys = quantitis - orderItems.getQuantitis();
-            boolean isAccept = AppUtils.isAcceptMenu();
+            int deltaQuantitys = quantitis - orderItems.getQuantitis(); // khoảng tăng(hoặc giảm) = số lượng ban đầu - số lượng hiện orderItem đang có
+            boolean isAccept = AppUtils.isAcceptMenu(); //nếu deltaQuantitys > tăng số lượng || deltaQuantitys < 0 giảm số lượng
             if (isAccept){
                 if (deltaQuantitys > 0) {
+                    //trường hợp tăng số lượng
                     deltaQuantitys = Math.abs(quantitis - orderItems.getQuantitis());
                     System.out.println("TH tăng số lượng.");
                     if (deltaQuantitys>product.getQuantitys()){
