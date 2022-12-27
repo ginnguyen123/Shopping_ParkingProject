@@ -33,13 +33,27 @@ public class AccountServices implements AbstractServices<Account> {
 
     public Account login(String username, String password){
         List<Account> accountList = findAll();
+        try {
+            for (Account account : accountList){
+                if (account.getUserName().equals(username) &&
+                        account.getPassWord().equals(password)){
+                    return account;
+                }
+            }
+        }catch (NullPointerException nullPointerException){
+            return null;
+        }
+        return null;
+    }
+    public boolean isLogin(String username, String password){
+        List<Account> accountList = findAll();
         for (Account account : accountList){
             if (account.getUserName().equals(username) &&
                     account.getPassWord().equals(password)){
-                return account;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     @Override
@@ -48,6 +62,7 @@ public class AccountServices implements AbstractServices<Account> {
         accountList.add(newAccount);
         IOFile.writeFile(accountList,pathFile);
     }
+
 
     @Override
     public void edit(Account account) {
@@ -76,6 +91,7 @@ public class AccountServices implements AbstractServices<Account> {
                 break;
             }
         }
+        IOFile.writeFile(accountList,pathFile);
     }
 
     @Override
@@ -103,6 +119,23 @@ public class AccountServices implements AbstractServices<Account> {
         List<Account> accountList = findAll();
         for (Account account : accountList){
             if (account.getAccountID() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean isExistPassword(String password){
+        List<Account> accountList = findAll();
+        for (Account account : accountList){
+            if (account.getPassWord().equals(password))
+                return true;
+        }
+        return false;
+    }
+    public boolean isExistUserName(String username){
+        List<Account> accountList = findAll();
+        for (Account account : accountList){
+            if (account.getUserName().equals(username)){
                 return true;
             }
         }

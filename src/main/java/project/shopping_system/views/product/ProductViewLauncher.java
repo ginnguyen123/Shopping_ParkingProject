@@ -1,5 +1,6 @@
 package project.shopping_system.views.product;
 
+import project.shopping_system.models.Account;
 import project.shopping_system.models.AccountTypes;
 import project.shopping_system.services.ProductServices;
 import project.shopping_system.utils.AppUtils;
@@ -24,7 +25,7 @@ public class ProductViewLauncher {
     private static final int USER_RETURN = 4;
     private static final ProductViews productViews = new ProductViews();
     private static void adminManagerMenuProduct(){
-        System.out.println(">Menu product.");
+        System.out.println(">Quản lí sản phẩm.");
         System.out.println("1.Hiển thị danh sách sản phẩm.");
         System.out.println("2.Thêm sản phẩm.");
         System.out.println("3.Sửa sản phẩm.");
@@ -38,7 +39,7 @@ public class ProductViewLauncher {
         System.out.print(">Chọn chức năng: ");
     }
     private static void userManagerMenuProduct(){
-        System.out.println(">Menu product.");
+        System.out.println(">Quản lí sản phẩm.");
         System.out.println("1.Hiển thị danh sách sản phẩm.");
         System.out.println("2.Tìm kiếm sản phẩm.");
         System.out.println("3.Sắp xếp sản phẩm.");
@@ -46,9 +47,9 @@ public class ProductViewLauncher {
         System.out.println("0.Thoát.");
         System.out.print(">Chọn chức năng: ");
     }
-    public static void productLaunchs (AccountTypes accountTypes){
+    public static void productLaunchs (Account account){
         boolean isReturn = true;
-        if (accountTypes == AccountTypes.ADMIN){
+        if (account.getAccountTypes() == AccountTypes.ADMIN){
             do {
             adminManagerMenuProduct();
             int choice = AppUtils.retryParseIntInput();
@@ -80,7 +81,7 @@ public class ProductViewLauncher {
                             isReturn = false;
                             break;
                         case EXIT:
-                            System.out.println("Thoát chương trình.");
+                            System.out.println(">Thoát chương trình.");
                             System.exit(1);
                             break;
                         default:
@@ -91,7 +92,7 @@ public class ProductViewLauncher {
                     }
             }while (isReturn);
         }
-        if (accountTypes == AccountTypes.USER) {
+        if (account.getAccountTypes() == AccountTypes.USER) {
             int choice = 0;
             do {
                 userManagerMenuProduct();
@@ -111,7 +112,7 @@ public class ProductViewLauncher {
                             isReturn = false;
                             break;
                         case EXIT:
-                            System.out.println("Thoát chương trình.");
+                            System.out.println(">Thoát chương trình.");
                             System.exit(1);
                             break;
                         default:

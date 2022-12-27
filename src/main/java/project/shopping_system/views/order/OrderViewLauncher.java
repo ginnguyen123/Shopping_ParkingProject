@@ -61,10 +61,10 @@ public class OrderViewLauncher {
         System.out.println("0.Thoát.");
         System.out.print(">Chọn chức năng: ");
     }
-    public static void  oderLaunchs (AccountTypes accountTypes){
+    public static void  oderLaunchs (Account account){
         boolean isReturn = true;
         int options;
-        if (accountTypes == AccountTypes.ADMIN){
+        if (account.getAccountTypes() == AccountTypes.ADMIN){
             do {
                 adminManagerMenuOrder();
                 try{
@@ -74,7 +74,7 @@ public class OrderViewLauncher {
                             orderViews.showOrderList(OrderServices.findAll(), Options.SHOW);
                             break;
                         case ADD_ORDER:
-                            orderViews.add(47489580);
+                            orderViews.add(account.getAccountID());
                             break;
                         case EDIT_ODER:
                             orderViews.edit();
@@ -108,7 +108,7 @@ public class OrderViewLauncher {
                 }
         }while (isReturn);
         }
-        if (accountTypes == AccountTypes.USER){
+        if (account.getAccountTypes() == AccountTypes.USER){
             do {
                 userManagerMenuOrder();
                 try{
@@ -118,7 +118,7 @@ public class OrderViewLauncher {
                             orderViews.showOrderList(OrderServices.findAll(),Options.SHOW);
                             break;
                         case ADD_ORDER:
-                            orderViews.add(47489580);
+                            orderViews.add(account.getAccountID());
                             break;
                         case EDIT_ODER:
                             orderViews.edit();
@@ -171,6 +171,7 @@ public class OrderViewLauncher {
                     case STATISTICES_RETURN:
                         break;
                     case EXIT:
+                        System.out.println(">Thoát chương trình");
                         System.exit(1);
                     default:
                         System.out.println("Chọn sai chức năng. Kiểm tra lại.");

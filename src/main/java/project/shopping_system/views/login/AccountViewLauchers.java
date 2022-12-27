@@ -1,6 +1,8 @@
 package project.shopping_system.views.login;
 
+import project.shopping_system.models.Account;
 import project.shopping_system.utils.AppUtils;
+import project.shopping_system.views.Options;
 
 import java.util.Scanner;
 
@@ -18,14 +20,14 @@ public class AccountViewLauchers {
         System.out.println(">Quản lý tài khoản.");
         System.out.println("1.Hiển thị danh sách tài khoản.");
         System.out.println("2.Thêm tài khoản.");
-        System.out.println("3.Chỉnh sửa tài khoản.");
+        System.out.println("3.Đổi mật khẩu.");
         System.out.println("4.Xóa tài khoản.");
         System.out.println("5.Tìm tài khoản.");
         System.out.println("6.Quay lại.");
         System.out.println("0.Thoát chương trình.");
         System.out.print(">Chọn chức năng: ");
     }
-    public static void lauch(){
+    public static void lauch(Account account){
         boolean isRetry = true;
         do {
             try {
@@ -33,17 +35,19 @@ public class AccountViewLauchers {
                 int choice = Integer.parseInt(scanner.nextLine());
                 switch (choice){
                     case SHOW:
-                        accountViews.showAccountList();;
+                        accountViews.showAccountList(Options.SHOW);
                         break;
                     case ADD:
                         accountViews.addUser();
                         break;
                     case EDIT:
-
+                        accountViews.edit(account);
                         break;
                     case REMOVE:
+                        accountViews.remove();
                         break;
                     case FINE:
+                        accountViews.find();
                         break;
                     case RETURN:
                         isRetry = false;

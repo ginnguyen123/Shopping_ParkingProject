@@ -3,6 +3,7 @@ package project.shopping_system.views.order;
 import project.shopping_system.models.Order;
 import project.shopping_system.models.OrderItems;
 import project.shopping_system.models.Product;
+import project.shopping_system.services.AccountServices;
 import project.shopping_system.services.OrderItemServices;
 import project.shopping_system.services.OrderServices;
 import project.shopping_system.services.ProductServices;
@@ -19,6 +20,7 @@ public class OrderViews {
     private OrderServices orderServices;
     private ProductServices productServices;
     private OrderItemServices orderItemServices;
+    private AccountServices accountServices = new AccountServices();
     private OrderItemViews orderItemViews;
     public OrderViews(){
         orderServices = OrderServices.getInstance();
@@ -32,7 +34,7 @@ public class OrderViews {
                     "Address","Email","Grand total","ID employee","At created","At updated");
             System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
                     order.getCustomerAddress(),order.getCustomerEmail(),order.getGrandTotal(),
-                    order.getUserID(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
+                    accountServices.findObject(order.getUserID()).getFullName(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
         }
         if (orderServices.isExistObject(order.getOrderID())){
             orderItemViews.showOrderItemExistList(order.getOrderID());
@@ -70,12 +72,12 @@ public class OrderViews {
         int count = 0;
         if (options == Options.SHOW || options == Options.EDIT || options == Options.REMOVE || options == Options.STATISTICAL || options == Options.SORT) {
             System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
-                    "Address","Email","Grand total","ID employee","At created","At updated");
+                    "Address","Email","Grand total","Employee","At created","At updated");
             for (Order order : orderList){
                 ++count;
                 System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
                         order.getCustomerAddress(),order.getCustomerEmail(),order.getGrandTotal(),
-                        order.getUserID(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
+                        accountServices.findObject(order.getUserID()).getFullName(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
 
             }
         }
@@ -302,9 +304,9 @@ public class OrderViews {
     public void findOrderAdminMenu(){
         boolean isRetry = false;
         do {
-            System.out.println(">Menu tìm kiếm hóa đơn.");
-            System.out.println("1.Tìm hóa đơn chưa in.");
-            System.out.println("2.Tìm hóa đơn đã in.");
+            System.out.println(">Tìm kiếm hóa đơn.");
+            System.out.println("1.Hóa đơn chưa in.");
+            System.out.println("2.Hóa đơn đã in.");
             System.out.println("0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
             int choice = AppUtils.retryParseIntInput();
@@ -374,9 +376,9 @@ public class OrderViews {
         int choice;
         boolean isRetry = true;
         do {
-            System.out.println("Menu sắp xếp hóa đơn.");
-            System.out.println("1.Sắp xếp hóa đơn chưa in.");
-            System.out.println("2.Sắp xếp hóa đơn đã in.");
+            System.out.println(">Sắp xếp hóa đơn.");
+            System.out.println("1.Hóa đơn chưa in.");
+            System.out.println("2.Hóa đơn đã in.");
             System.out.println("0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
             choice = AppUtils.retryParseIntInput();
@@ -403,9 +405,9 @@ public class OrderViews {
         boolean isRetry = true;
         int choice;
         do {
-            System.out.println("Menu sắp xếp hóa đơn.");
-            System.out.println("1.Sắp xếp theo tổng tiền hóa đơn.");
-            System.out.println("2.Sắp xếp theo họ tên khách hàng.");
+            System.out.println(">Sắp xếp hóa đơn.");
+            System.out.println("1.Theo tổng tiền hóa đơn.");
+            System.out.println("2.Theo họ tên khách hàng.");
             System.out.println("0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
             choice = AppUtils.retryParseIntInput();
@@ -432,9 +434,9 @@ public class OrderViews {
         boolean isRetry = false;
         int choice;
         do {
-            System.out.println("Menu sắp xếp hóa đơn.");
-            System.out.println("1.Sắp xếp theo tổng tiền hóa đơn.");
-            System.out.println("2.Sắp xếp theo họ tên khách hàng.");
+            System.out.println(">Menu sắp xếp hóa đơn.");
+            System.out.println("1.Theo tổng tiền hóa đơn.");
+            System.out.println("2.Theo họ tên khách hàng.");
             System.out.println("0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
             choice = AppUtils.retryParseIntInput();
@@ -461,9 +463,9 @@ public class OrderViews {
         boolean isRetry = false;
         int choice;
         do {
-            System.out.println(">Sắp xếp theo tổng tiền hóa đơn");
-            System.out.println("1.Sắp xếp theo tổng tiền tăng dần.");
-            System.out.println("2.Sắp xếp theo tổng tiền giảm dần.");
+            System.out.println(">Menu sắp xếp hóa đơn.");
+            System.out.println("1.Theo tổng tiền tăng dần.");
+            System.out.println("2.Theo tổng tiền giảm dần.");
             System.out.println("0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
             choice = AppUtils.retryParseIntInput();
@@ -480,7 +482,7 @@ public class OrderViews {
                     isRetry = false;
                     break;
                 default:
-                    System.out.println("Chọn sai chức năng. Kiểm tra laị.");
+                    System.out.println(">Chọn sai chức năng. Kiểm tra laị.");
                     System.out.print(">Nhập lại: ");
                     isRetry = true;
                     break;
@@ -491,7 +493,7 @@ public class OrderViews {
         boolean isRetry = true;
         int choice;
         do {
-            System.out.println(">Sắp xếp theo họ tên khách hàng.");
+            System.out.println(">Theo họ tên khách hàng.");
             System.out.println("1.Sắp xếp từ A đến Z.");
             System.out.println("2.Sắp xếp từ Z đến A.");
             System.out.println("0.Quay lại.");
@@ -519,7 +521,7 @@ public class OrderViews {
         boolean isRetry = true;
         int choice;
         do {
-            System.out.println(">Sắp xếp theo họ tên khách hàng.");
+            System.out.println(">Theo họ tên khách hàng.");
             System.out.println("1.Sắp xếp từ A đến Z.");
             System.out.println("2.Sắp xếp từ Z đến A.");
             System.out.println("0.Quay lại.");
@@ -547,7 +549,7 @@ public class OrderViews {
     private void sortByGrandTotalOrderMenu(){
         boolean isRetry = false;
         int choice;
-            System.out.println(">Sắp xếp theo tổng tiền hóa đơn");
+            System.out.println(">Theo tổng tiền hóa đơn");
             System.out.println("1.Sắp xếp theo tổng tiền tăng dần.");
             System.out.println("2.Sắp xếp theo tổng tiền giảm dần.");
             System.out.println("0.Quay lại.");
