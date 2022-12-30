@@ -154,7 +154,9 @@ public class LoginViews {
                     isChoice = isChoice();
                     if (isChoice)
                         System.out.print(">Nhập lại: ");
-                    System.out.println(">Thoát chương trình.");
+                    else {
+                        System.out.println(">Thoát chương trình.");
+                    }
                     break;
             }
         }while (isChoice);

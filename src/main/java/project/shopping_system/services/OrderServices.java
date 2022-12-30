@@ -2,6 +2,7 @@ package project.shopping_system.services;
 
 import project.shopping_system.models.Order;
 import project.shopping_system.models.Product;
+import project.shopping_system.utils.DateTimeUtil;
 import project.shopping_system.utils.IOFile;
 
 import java.time.Instant;
@@ -240,5 +241,67 @@ public class OrderServices implements AbstractServices<Order>{
             }
         });
         return orderList;
+    }
+    public double statisticalByDay(Instant day){
+        List<Order> orderList = findAllOrdersRemoved();
+        String strDay = DateTimeUtil.formatDayIntanceToString(day);
+        double statisticalByDay = 0;
+        for (Order order : orderList){
+            if (strDay.equals(DateTimeUtil.formatDayIntanceToString(order.getAtUpdated()))){
+                statisticalByDay += order.getGrandTotal();
+            }
+        }
+        return statisticalByDay;
+    }
+    public double statisticalByMonth(Instant month){
+        List<Order> orderList = findAllOrdersRemoved();
+        String strMonth = DateTimeUtil.formatMonthIntanceToString(month);
+        double statisticalByMonth = 0;
+        for (Order order : orderList){
+            if (strMonth.equals(DateTimeUtil.formatMonthIntanceToString(order.getAtUpdated())))
+                statisticalByMonth += order.getGrandTotal();
+        }
+        return statisticalByMonth;
+    }
+    public double statisticalByYear(Instant year){
+        List<Order> orderList = findAllOrdersRemoved();
+        String strYear = DateTimeUtil.formatYearIntanceToString(year);
+        double statisticalByYear = 0;
+        for (Order order : orderList){
+            if (strYear.equals(DateTimeUtil.formatYearIntanceToString(order.getAtUpdated())))
+                statisticalByYear += order.getGrandTotal();
+        }
+        return statisticalByYear;
+    }
+    public List<Order> statisticalByDayList(Instant day){
+        List<Order> orderList = findAllOrdersRemoved();
+        List<Order> statisticalByDayList = new ArrayList<>();
+        String strDay = DateTimeUtil.formatDayIntanceToString(day);
+        for (Order order : orderList){
+           if (strDay.equals(DateTimeUtil.formatDayIntanceToString(order.getAtUpdated()))){
+               statisticalByDayList.add(order);
+           }
+        }
+        return statisticalByDayList;
+    }
+    public List<Order> statisticalByMonthList(Instant month){
+        List<Order> orderList = findAllOrdersRemoved();
+        List<Order> statisticalByMonthList = new ArrayList<>();
+        String strDay = DateTimeUtil.formatMonthIntanceToString(month);
+        for (Order order : orderList){
+            if (strDay.equals(DateTimeUtil.formatMonthIntanceToString(order.getAtUpdated())))
+                statisticalByMonthList.add(order);
+        }
+        return statisticalByMonthList;
+    }
+    public List<Order> statisticalByYearList(Instant year){
+        List<Order> orderList = findAllOrdersRemoved();
+        List<Order> statisticalByYearList = new ArrayList<>();
+        String strDay = DateTimeUtil.formatYearIntanceToString(year);
+        for (Order order : orderList){
+            if (strDay.equals(DateTimeUtil.formatYearIntanceToString(order.getAtUpdated())))
+                statisticalByYearList.add(order);
+        }
+        return statisticalByYearList;
     }
 }

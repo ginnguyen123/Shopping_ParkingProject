@@ -156,17 +156,16 @@ public class OrderViewLauncher {
         boolean isReturn = false;
         statisticalManagerMenu();
         do {
-            try{
                 int options = Integer.parseInt(scanner.nextLine());
                 switch (options){
                     case STATISTICES_BY_DAYS:
-                        //chưa làm chức năng orderViews.statisticalByDay();
+                        orderViews.statisticalByDay();
                         break;
                     case STATISTICES_BY_MONTHS:
-                        //chưa làm chức năng orderViews.statisticalByMonths();
+                        orderViews.statisticalByMonth();
                         break;
                     case STATISTICES_BY_YEARS:
-                        //chưa làm chức năng orderViews.statisticalByYears();
+                        orderViews.statisticalByYear();
                         break;
                     case STATISTICES_RETURN:
                         break;
@@ -178,11 +177,7 @@ public class OrderViewLauncher {
                         System.out.print("Nhập lại: ");
                         isReturn = true;
                 }
-            }catch (Exception e){
-                System.out.println(">Nhập sai cú pháp. Kiểm tra lại.");
-                System.out.print("Nhập lại: ");
-                isReturn = true;
-            }
+
         }while (isReturn);
     }
 

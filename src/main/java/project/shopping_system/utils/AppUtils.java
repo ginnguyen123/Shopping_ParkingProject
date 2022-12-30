@@ -2,6 +2,7 @@ package project.shopping_system.utils;
 
 import project.shopping_system.views.Options;
 
+import java.time.Instant;
 import java.util.Scanner;
 
 public class AppUtils {
@@ -203,10 +204,10 @@ public class AppUtils {
         }while (isFullName);
         return null;
     }
-    public static String retryDateInput(){
+    public static Instant retryDayInput(){
         String dates;
         boolean isDates;
-        System.out.print("Nhập ngày - tháng - năm: ");
+        System.out.print("Nhập ngày (theo định dạng dd-mm-yyy): ");
         do {
             dates = scanner.nextLine();
             retryString(dates);
@@ -214,15 +215,23 @@ public class AppUtils {
                 System.out.println("Nhập sai định dạng.");
                 System.out.print("Nhập lại: ");
                 isDates = true;
-            }else
-                return dates;
+            }else{
+                String[] arrDay = dates.split("-");
+                if (arrDay[0].length() == 1)
+                    arrDay[0] = "0" + arrDay[0];
+                if (arrDay[1].length() == 1)
+                    arrDay[1] = "0" + arrDay[1];
+                dates = arrDay[0] + "-" + arrDay[1] + "-" + arrDay[2];
+                Instant instant = DateTimeUtil.formatStringToInstanAsDay(dates);
+                return instant;
+            }
         }while (isDates);
         return null;
     }
-    public static String retryMonthInput(){
+    public static Instant retryMonthInput(){
         String months;
         boolean isMonths;
-        System.out.print("Nhập tháng: ");
+        System.out.print("Nhập tháng (theo định dạng mm-yyyy): ");
         do {
             months = scanner.nextLine();
             retryString(months);
@@ -230,15 +239,22 @@ public class AppUtils {
                 System.out.println("Nhập sai định dạng.");
                 System.out.print("Nhập lại: ");
                 isMonths = true;
-            }else
-                return months;
+            }else{
+                String[] arrMonth = months.split("-");
+                    if (arrMonth[0].length() == 1){
+                        arrMonth[0] = "0" + arrMonth[0];
+                        months = arrMonth[0] + "-" + arrMonth[1];
+                    }
+                    Instant instant = DateTimeUtil.formatStringToInstanAsMonth(months);
+                    return instant;
+            }
         }while (isMonths);
         return null;
     }
-    public static String retryYearInput(){
+    public static Instant retryYearInput(){
         String years;
         boolean isYears;
-        System.out.print("Nhập năm: ");
+        System.out.print("Nhập năm (theo định dạng yyyy): ");
         do {
             years = scanner.nextLine();
             retryString(years);
@@ -246,8 +262,10 @@ public class AppUtils {
                 System.out.println("Nhập sai định dạng.");
                 System.out.print("Nhập lại: ");
                 isYears = true;
-            }else
-                return years;
+            }else{
+                Instant instant = DateTimeUtil.formatStringToInstanAsYear(years);
+                return instant;
+            }
         }while (isYears);
         return null;
     }

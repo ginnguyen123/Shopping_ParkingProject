@@ -84,7 +84,7 @@ public class OrderViews {
         boolean isContinus = false;
         if (options == Options.SORT || options == Options.SHOW || options == Options.STATISTICAL || options == Options.REMOVE){
             do {
-                if (count == 0){
+                if (count == 0 && options != Options.STATISTICAL){
                     System.out.println("0.Quay lại.");
                     System.out.print(">Chọn chức năng: ");
                     int choice = AppUtils.retryParseIntInput();
@@ -116,7 +116,6 @@ public class OrderViews {
             }while (isContinus);
         }
     }
-
     public void add(long userID){
         long orderID = System.currentTimeMillis() % 100000000;
         String customerFullName = AppUtils.retryFullNameInput();
@@ -576,4 +575,31 @@ public class OrderViews {
             }
         }while (isRetry);
     }
+    public void statisticalByDay(){
+        Instant days = AppUtils.retryDayInput();
+        System.out.printf("═════════════════════════════════════════ DOANH THU NGÀY %s ════════════════════════════════════\n", DateTimeUtil.formatDayIntanceToString(days));
+        double statisticalByDay = orderServices.statisticalByDay(days);
+        showStatistical(statisticalByDay, orderServices.statisticalByDayList(days));
+    }
+    public void statisticalByMonth(){
+        Instant months = AppUtils.retryMonthInput();
+        System.out.printf("═════════════════════════════════════════ DOANH THU THÁNG %s ════════════════════════════════════\n", DateTimeUtil.formatMonthIntanceToString(months));
+        double statisticalByMonth = orderServices.statisticalByMonth(months);
+        showStatistical(statisticalByMonth,orderServices.statisticalByYearList(months));
+    }
+    public void statisticalByYear(){
+        Instant years = AppUtils.retryYearInput();
+        System.out.printf("═════════════════════════════════════════ DOANH THU NĂM %s ════════════════════════════════════\n", DateTimeUtil.formatYearIntanceToString(years));
+        double statisticalByYear = orderServices.statisticalByYear(years);
+        showStatistical(statisticalByYear,orderServices.statisticalByYearList(years));
+    }
+    private void showStatistical(double statistical, List<Order> orderList){
+        showOrderList(orderList,Options.STATISTICAL);
+        System.out.println("║-----------------------------------------------------------------------------------------------------║");
+        System.out.printf("║                                                         TỔNG DOANH THU: %-20s  ║\n", statistical);
+        System.out.println("║-----------------------------------------------------------------------------------------------------║");
+        System.out.println("Nhập phím bất kì để tiếp tục.");
+        String anyKey = scanner.nextLine();
+    }
 }
+
