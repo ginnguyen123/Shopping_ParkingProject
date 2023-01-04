@@ -30,9 +30,9 @@ public class OrderViews {
     }
     public void showOrderDetail(Order order,Options options){
         if(options != Options.EDIT || options != Options.ADD || options == Options.FIND){
-            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
-                    "Address","Email","Grand total","ID employee","At created","At updated");
-            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
+            System.out.printf("|%-8s| %-16s| %-16s| %-20s| %-25s| %-16s| %-10s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
+                    "Address","Email","Grand total","Employee","At created","At updated");
+            System.out.printf("|%-8s| %-16s| %-16s| %-20s| %-25s| %-16s| %-10s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
                     order.getCustomerAddress(),order.getCustomerEmail(),order.getGrandTotal(),
                     accountServices.findObject(order.getUserID()).getFullName(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
         }
@@ -40,8 +40,8 @@ public class OrderViews {
             orderItemViews.showOrderItemExistList(order.getOrderID());
         }
         if (orderServices.isRemoveObject(order.getOrderID()) && options == Options.STATISTICAL) {
-            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
-                    "Address","Email","Grand total","ID employee","At created","At updated");
+//            System.out.printf("|%-8s| %-16s| %-16s| %-20s| %-25s| %-16s| %-10s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
+//                    "Address","Email","Grand total","Employee","At created","At updated");
             orderItemViews.showOrderItemRemovedList(order.getOrderID());
 
         }
@@ -69,13 +69,14 @@ public class OrderViews {
         }
     }
     public void showOrderList(List<Order> orderList, Options options){
+        // phân trang sử dụng   phương thức .sublist(from index, to index)
         int count = 0;
         if (options == Options.SHOW || options == Options.EDIT || options == Options.REMOVE || options == Options.STATISTICAL || options == Options.SORT) {
-            System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
+            System.out.printf("|%-8s| %-16s| %-16s| %-20s| %-25s| %-16s| %-10s| %-20s| %-20s|\n","ID", "Full name","Phone Number",
                     "Address","Email","Grand total","Employee","At created","At updated");
             for (Order order : orderList){
                 ++count;
-                System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s| %-16s| %-5s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
+                System.out.printf("|%-8s| %-16s| %-16s| %-20s| %-25s| %-16s| %-10s| %-20s| %-20s|\n",order.getOrderID(),order.getCustomerFullName(),order.getCustomerPhoneNumber(),
                         order.getCustomerAddress(),order.getCustomerEmail(),order.getGrandTotal(),
                         accountServices.findObject(order.getUserID()).getFullName(),DateTimeUtil.formatIntanceToString(order.getAtCreated()),DateTimeUtil.formatIntanceToString(order.getAtUpdated()));
 
@@ -97,7 +98,7 @@ public class OrderViews {
                             System.out.println("Chọn sai chức năng.");
                     }
                 }
-                if (options != Options.REMOVE && options != Options.STATISTICAL){
+                if (options != Options.REMOVE && options != Options.STATISTICAL && options != Options.SHOW){
                     System.out.println("1.Xem chi tiết hóa đơn.\t\t\t\t0.Quay lại.");
                     System.out.print(">Chọn chức năng: ");
                     int choice = AppUtils.retryParseIntInput();
@@ -115,6 +116,10 @@ public class OrderViews {
                 }
             }while (isContinus);
         }
+        if (options == Options.SHOW && options != Options.STATISTICAL){
+            System.out.println(">Nhập phím bất kì để tiếp tục.");
+            String str = scanner.nextLine();
+        }
     }
     public void add(long userID){
         long orderID = System.currentTimeMillis() % 100000000;
@@ -131,9 +136,9 @@ public class OrderViews {
         orderServices.add(order);
         showOrderDetail(order,Options.ADD);
         System.out.println("Tạo hóa đơn thành công!");
-        System.out.println("1.Thêm sản phẩm\t\t\t\t2.Sửa hóa đơn\t\t\t\t0.Quay lại.");
         boolean isContinus = true;
         do {
+        System.out.println("1.Thêm sản phẩm\t\t\t\t2.Sửa hóa đơn\t\t\t\t0.Quay lại.");
             System.out.print(">Chọn chức năng: ");
             int choice = AppUtils.retryParseIntInput();
             switch (choice){
@@ -329,7 +334,7 @@ public class OrderViews {
         }while (isRetry);
     }
     public void findOrder(List<Order> orderList, Options options){
-        showOrderList(orderList, Options.FIND);
+        //showOrderList(orderList, Options.FIND);
         boolean isContinus = false;
         do {
             System.out.print("Nhập mã ID hóa đơn: ");
@@ -353,7 +358,7 @@ public class OrderViews {
 
     }
     public void findExistOrder(){
-        showOrderList(OrderServices.findAll(),Options.STATISTICAL);
+        //showOrderList(OrderServices.findAll(),Options.STATISTICAL);
         System.out.print("Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isExistObject(orderID)){
@@ -362,14 +367,16 @@ public class OrderViews {
             System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
     }
     private void findRemovedOrder(){
-        showOrderList(OrderServices.findAllOrdersRemoved(),Options.REMOVE);
+//        showOrderList(OrderServices.findAllOrdersRemoved(),Options.REMOVE);
         System.out.print("Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isRemoveObject(orderID)){
             showOrderDetail(orderServices.findRemovedObject(orderID),Options.STATISTICAL);
             //xem chi tiết hóa đơn, orderItemViews
         }else
-            System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+            System.out.println(">Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+        System.out.println(">Nhập phím bất kì để tiếp tục!");
+        String str = scanner.nextLine();
     }
     public void sortOrderMenuAdmin(){
         int choice;
@@ -585,7 +592,7 @@ public class OrderViews {
         Instant months = AppUtils.retryMonthInput();
         System.out.printf("═════════════════════════════════════════ DOANH THU THÁNG %s ════════════════════════════════════\n", DateTimeUtil.formatMonthIntanceToString(months));
         double statisticalByMonth = orderServices.statisticalByMonth(months);
-        showStatistical(statisticalByMonth,orderServices.statisticalByYearList(months));
+        showStatistical(statisticalByMonth,orderServices.statisticalByMonthList(months));
     }
     public void statisticalByYear(){
         Instant years = AppUtils.retryYearInput();
@@ -596,9 +603,9 @@ public class OrderViews {
     private void showStatistical(double statistical, List<Order> orderList){
         showOrderList(orderList,Options.STATISTICAL);
         System.out.println("║-----------------------------------------------------------------------------------------------------║");
-        System.out.printf("║                                                         TỔNG DOANH THU: %-20s  ║\n", statistical);
+        System.out.printf("║                                                         TỔNG DOANH THU: %-20s \t\t  ║\n", statistical);
         System.out.println("║-----------------------------------------------------------------------------------------------------║");
-        System.out.println("Nhập phím bất kì để tiếp tục.");
+        System.out.println(">Nhập phím bất kì để tiếp tục.");
         String anyKey = scanner.nextLine();
     }
 }

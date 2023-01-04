@@ -22,5 +22,11 @@ import static javafx.scene.input.KeyCode.Z;
 public class Main {
     public static void main(String[] args) {
     LoginViews.Laucher();
+//        Instant instant = Instant.now();
+//        System.out.println(instant);
+//        Instant year = AppUtils.retryYearInput();
+//        System.out.println(year);
+//        String strYear = DateTimeUtil.formatYearIntanceToString(year);
+//        System.out.println(strYear);
     }
 }

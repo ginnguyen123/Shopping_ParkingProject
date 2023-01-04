@@ -63,7 +63,7 @@ public class OrderServices implements AbstractServices<Order>{
                 if(customerEmail!=null && !customerEmail.trim().isEmpty())
                     oldOrder.setCustomerEmail(customerEmail);
                 double grandTotal = order.getGrandTotal();
-                if (grandTotal > 0)
+                if (grandTotal >= 0)
                     oldOrder.setGrandTotal(grandTotal);
                 oldOrder.setAtUpdated(atUpdated);
                 break;
@@ -268,7 +268,7 @@ public class OrderServices implements AbstractServices<Order>{
         String strYear = DateTimeUtil.formatYearIntanceToString(year);
         double statisticalByYear = 0;
         for (Order order : orderList){
-            if (strYear.equals(DateTimeUtil.formatYearIntanceToString(order.getAtUpdated())))
+            if (DateTimeUtil.formatYearIntanceToString(order.getAtUpdated()).equals(strYear))
                 statisticalByYear += order.getGrandTotal();
         }
         return statisticalByYear;
@@ -287,9 +287,9 @@ public class OrderServices implements AbstractServices<Order>{
     public List<Order> statisticalByMonthList(Instant month){
         List<Order> orderList = findAllOrdersRemoved();
         List<Order> statisticalByMonthList = new ArrayList<>();
-        String strDay = DateTimeUtil.formatMonthIntanceToString(month);
+        String strMonth = DateTimeUtil.formatMonthIntanceToString(month);
         for (Order order : orderList){
-            if (strDay.equals(DateTimeUtil.formatMonthIntanceToString(order.getAtUpdated())))
+            if (strMonth.equals(DateTimeUtil.formatMonthIntanceToString(order.getAtUpdated())))
                 statisticalByMonthList.add(order);
         }
         return statisticalByMonthList;
@@ -297,9 +297,9 @@ public class OrderServices implements AbstractServices<Order>{
     public List<Order> statisticalByYearList(Instant year){
         List<Order> orderList = findAllOrdersRemoved();
         List<Order> statisticalByYearList = new ArrayList<>();
-        String strDay = DateTimeUtil.formatYearIntanceToString(year);
+        String strYear= DateTimeUtil.formatYearIntanceToString(year);
         for (Order order : orderList){
-            if (strDay.equals(DateTimeUtil.formatYearIntanceToString(order.getAtUpdated())))
+            if (DateTimeUtil.formatYearIntanceToString(order.getAtUpdated()).equals(strYear))
                 statisticalByYearList.add(order);
         }
         return statisticalByYearList;

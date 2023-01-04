@@ -26,7 +26,6 @@ public class DateTimeUtil {
 //        return simpleDateFormat.format(date);
 //    }
     public static String formatIntanceToString(Instant instantDate){
-        System.out.println(instantDate);
         return dateTimeFormatter.format(instantDate);
     }
     public static String formatDayIntanceToString(Instant instantDate){

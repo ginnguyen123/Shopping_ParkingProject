@@ -28,7 +28,7 @@ public class OrderViewLauncher {
     public OrderViewLauncher(){}
 
     private static void adminManagerMenuOrder(){
-        System.out.println(">Menu oder.");
+        System.out.println(">Quản lí hóa đơn.");
         System.out.println("1.Hiển thị danh sách hóa đơn chưa in.");
         System.out.println("2.Thêm hóa đơn.");
         System.out.println("3.Sửa hóa đơn.");
@@ -41,7 +41,7 @@ public class OrderViewLauncher {
         System.out.print(">Chọn chức năng: ");
     }
     private static void userManagerMenuOrder(){
-        System.out.println(">Menu oder.");
+        System.out.println(">Quản lí hóa đơn.");
         System.out.println("1.Hiển thị danh sách hóa đơn.");
         System.out.println("2.Thêm hóa đơn.");
         System.out.println("3.Sửa hóa đơn.");

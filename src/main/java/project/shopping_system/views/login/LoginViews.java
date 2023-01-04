@@ -51,8 +51,8 @@ public class LoginViews {
     }
     private static void menuUserAccount(){
         System.out.println(">Quản lí tài khoản.");
-        System.out.println("1.Quản lí hóa đơn.");
-        System.out.println("2.Quản lí sản phẩm.");
+        System.out.println("1.Quản lí sản phẩm.");
+        System.out.println("2.Quản lí hóa đơn.");
         System.out.println("0.Thoát.");
         System.out.print(">Chọn chức năng: ");
     }
@@ -135,11 +135,11 @@ public class LoginViews {
     }
     public static void Laucher(){
         boolean isChoice = false;
+        do {
         System.out.println(">Đăng nhập tài khoản.");
         System.out.println("1.Đăng nhập.");
         System.out.println("0.Thoát chương trình.");
         System.out.print(">Chọn chức năng: ");
-        do {
             String choice = scanner.nextLine();
             switch (choice){
                 case "1":
@@ -152,9 +152,9 @@ public class LoginViews {
                 default:
                     System.out.println("Chọn sai chức năng. Kiểm tra lại.");
                     isChoice = isChoice();
-                    if (isChoice)
-                        System.out.print(">Nhập lại: ");
-                    else {
+//                    if (isChoice)
+//                        System.out.print(">Nhập lại: ");
+                    if (isChoice == false){
                         System.out.println(">Thoát chương trình.");
                     }
                     break;

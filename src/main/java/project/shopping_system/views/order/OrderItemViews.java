@@ -19,7 +19,6 @@ public class OrderItemViews {
     private ProductServices productServices;
     private OrderItemServices orderItemServices;
     private ProductViews productViews = new ProductViews();
-
     Scanner scanner = new Scanner(System.in);
     public OrderItemViews(){
         orderServices = OrderServices.getInstance();
@@ -30,12 +29,12 @@ public class OrderItemViews {
         List<OrderItems> orderItemsList = OrderItemServices.findAll();
         int count = 0;
         //(long orderItemsID,  int quantitis,double prices,long orderID, long productID)
-        System.out.printf("%s %s %s %s %s\n","ID","Titles","Quantitis","Prices","Totals");
+        System.out.printf("|%-10s| %-20s| %-15s| %-15s| %-15s|\n","ID","Titles","Quantitis","Prices","Totals");
         for (OrderItems orderItems : orderItemsList){
             if (orderItems.getOrderID() == existOrderID){
                 ++count;
                 Product product = productServices.findObject(orderItems.getProductID());
-                System.out.printf("%s %s %s %s %s\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
+                System.out.printf("|%-10s| %-20s| %-15s| %-15s| %-15s|\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
                         orderItems.getPrices(),orderItems.getTotals());
             }
         }
@@ -66,13 +65,13 @@ public class OrderItemViews {
         List<OrderItems> orderItemsList = OrderItemServices.findAllOrderItemsRemove();
         int count = 0;
         //(long orderItemsID,  int quantitis,double prices,long orderID, long productID)
-        //System.out.printf("%s %s %s %s %s\n","ID","Titles","Quantitis","Prices","Totals");
+        System.out.printf("|%-10s| %-20s| %-15s| %-15s| %-15s|\n","ID","Titles","Quantitis","Prices","Totals");
         for (OrderItems orderItems : orderItemsList){
             if (orderItems.getOrderID() == removedOrderID){
                 ++count;
                 if (count!=0){
                     Product product = productServices.findProductRemoved(orderItems.getProductID());
-                    System.out.printf("%s %s %s %s %s\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
+                    System.out.printf("|%-10s| %-20s| %-15s| %-15s| %-15s|\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
                             orderItems.getPrices(),orderItems.getTotals());
                 }
             }
@@ -125,7 +124,7 @@ public class OrderItemViews {
                         orderItemServices.add(new OrderItems(orderItemID, quantitis, prices, orderID, productID));
                         totals = (double) quantitis * prices;
                     }
-                    System.out.println("Đã cập nhật orderItem thành công.");
+                    System.out.println(">Đã cập nhật thành công!");
 //                    orderViews.showOrder(orderServices.findObject(orderID), Options.ADD);
 //                    orderViews.showOderDetails(orderID,Options.ADD);
                 }
@@ -225,7 +224,7 @@ public class OrderItemViews {
                 if (deltaQuantitys > 0) {
                     //trường hợp tăng số lượng
                     deltaQuantitys = Math.abs(quantitis - orderItems.getQuantitis());
-                    System.out.println("TH tăng số lượng.");
+//                    System.out.println("TH tăng số lượng.");
                     if (deltaQuantitys>product.getQuantitys()){
                         System.out.printf("Số lượng sản phẩm hiện có %d không đủ. Cần thay đổi số lượng nhỏ hơn.\n",product.getQuantitys());
                     }else {
@@ -247,7 +246,7 @@ public class OrderItemViews {
                     }
                 }
                 else {
-                    System.out.println("TH giảm số lượng.");
+//                    System.out.println("TH giảm số lượng.");
                     deltaQuantitys = Math.abs(quantitis - orderItems.getQuantitis());
                     product.setQuantitys(product.getQuantitys() + deltaQuantitys);
                     orderItems.setQuantitis(quantitis);
@@ -280,12 +279,14 @@ public class OrderItemViews {
         orderItemServices.removeOrderItemNotWrited(orderItemID);
         productServices.removeProductRemoved(product.getProductID());
         orderServices.edit(order);
-        System.out.println("Đã xóa mục sản phẩm thành công");
+        System.out.println(">Đã xóa mục sản phẩm thành công");
+        System.out.println(">Nhấn phím bất kì để tiếp tục.");
+        String str = scanner.nextLine();
     }
     public void showOrderItem(OrderItems orderItems,Options options){
-        System.out.printf("%s %s %s %s %s\n","ID","Titles","Quantitis","Prices","Totals");
+        System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s|\n","ID","Titles","Quantitis","Prices","Totals");
         Product product = productServices.findObject(orderItems.getProductID());
-        System.out.printf("%s %s %s %s %s\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
+        System.out.printf("|%-8s| %-16s| %-16s| %-10s| %-16s|\n",orderItems.getOrderItemsID(),product.getTitles(),orderItems.getQuantitis(),
                     orderItems.getPrices(),orderItems.getTotals());
     }
 }
