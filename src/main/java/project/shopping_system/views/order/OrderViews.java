@@ -63,7 +63,7 @@ public class OrderViews {
                 case 0:
                     break;
                 default:
-                    System.out.println("Chọn sai chức năng.");
+                    System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
                     break;
             }
         }
@@ -95,7 +95,7 @@ public class OrderViews {
                             break;
                         default:
                             isContinus = true;
-                            System.out.println("Chọn sai chức năng.");
+                            System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
                     }
                 }
                 if (options != Options.REMOVE && options != Options.STATISTICAL && options != Options.SHOW){
@@ -111,12 +111,12 @@ public class OrderViews {
                             break;
                         default:
                             isContinus = true;
-                            System.out.println("Chọn sai chức năng.");
+                            System.out.println(">Chọn sai chức năng. Kiểm tra lại");
                     }
                 }
             }while (isContinus);
         }
-        if (options == Options.SHOW && options != Options.STATISTICAL){
+        if (options == Options.SHOW || options == Options.STATISTICAL){
             System.out.println(">Nhập phím bất kì để tiếp tục.");
             String str = scanner.nextLine();
         }
@@ -135,7 +135,7 @@ public class OrderViews {
         boolean isRetry = false;
         orderServices.add(order);
         showOrderDetail(order,Options.ADD);
-        System.out.println("Tạo hóa đơn thành công!");
+        System.out.println(">Tạo hóa đơn thành công!");
         boolean isContinus = true;
         do {
         System.out.println("1.Thêm sản phẩm\t\t\t\t2.Sửa hóa đơn\t\t\t\t0.Quay lại.");
@@ -152,7 +152,7 @@ public class OrderViews {
                     isContinus = false;
                     break;
                 default:
-                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
                     break;
             }
         }while (isContinus);
@@ -160,20 +160,20 @@ public class OrderViews {
     public void remove(){
         boolean isRetry = false;
         showOrderList(OrderServices.findAll(),Options.REMOVE);
-        System.out.print("Nhập mã ID hóa đơn: ");
+        System.out.print(">Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         do {
             if (orderServices.isExistObject(orderID)){
                 showOrderDetail(orderServices.findObject(orderID),Options.REMOVE);
-                System.out.println("Bạn đồng ý in hóa đơn này?");
+                System.out.println(">Bạn đồng ý in hóa đơn này?");
                 boolean isAccept = AppUtils.isAcceptMenu();
                 if (isAccept){
                     orderServices.remove(orderID);
                     orderItemServices.removeAllOrderItemsInOrder(orderID);
-                    System.out.println("Đã in hóa đơn thành công.");
+                    System.out.println(">Đã in hóa đơn thành công.");
                 }
             }else {
-                System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+                System.out.println(">Mã ID này không tồn tại. Kiểm tra lại.");
                 isRetry = AppUtils.isRetry(Options.REMOVE);
             }
         }while (isRetry);
@@ -185,10 +185,10 @@ public class OrderViews {
             if (AppUtils.isAcceptMenu()){
                 orderServices.remove(orderID);
                 orderItemServices.removeAllOrderItemsInOrder(orderID);
-                System.out.println("Đã in hóa đơn thành công.");
+                System.out.println(">Đã in hóa đơn thành công.");
             }
         }else {
-            System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+            System.out.println(">Mã ID này không tồn tại. Kiểm tra lại.");
         }
     }
     private void editMenu(){
@@ -209,7 +209,7 @@ public class OrderViews {
         showOrderList(OrderServices.findAll(), Options.EDIT);
 //        boolean isRetry = false;
 //        int choice ;
-            System.out.print("Nhập mã ID đơn hàng: ");
+            System.out.print(">Nhập mã ID đơn hàng: ");
             long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isExistObject(orderID)){
             editMenu();
@@ -218,22 +218,22 @@ public class OrderViews {
             int choice = AppUtils.retryParseIntInput();
             switch (choice){
                 case 1:
-                    System.out.print("Nhập họ và tên: ");
+                    System.out.print(">Nhập họ và tên: ");
                     String customerFullName = AppUtils.retryFullNameInput();
                     newOrder.setCustomerFullName(customerFullName);
                     break;
                 case 2:
-                    System.out.print("Nhập số điện thoại: ");
+                    System.out.print(">Nhập số điện thoại: ");
                     String customerPhoneNumber = AppUtils.retryPhonenumberInput();
                     newOrder.setCustomerPhoneNumber(customerPhoneNumber);
                     break;
                 case 3:
-                    System.out.print("Nhập địa chỉ: ");
+                    System.out.print(">Nhập địa chỉ: ");
                     String customerAddress = AppUtils.retryStreetAdressInput();
                     newOrder.setCustomerAddress(customerAddress);
                     break;
                 case 4:
-                    System.out.print("Nhập email: ");
+                    System.out.print(">Nhập email: ");
                     String customerEmail = AppUtils.retryEmailInput();
                     newOrder.setCustomerEmail(customerEmail);
                     break;
@@ -243,7 +243,7 @@ public class OrderViews {
                 case 0:
                     break;
                 default:
-                    System.out.println("Nhập sai chức năng. Kiểm tra lại.");
+                    System.out.println(">Nhập sai chức năng. Kiểm tra lại.");
                     break;
             }
             if ((choice == 1 || choice == 2 || choice == 3 || choice == 4) && choice != 5){
@@ -255,10 +255,10 @@ public class OrderViews {
                 }
             }
         }else {
-            System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+            System.out.println(">Mã ID này không tồn tại. Kiểm tra lại.");
         }
     }
-    public void editByID(long orderID){
+    private void editByID(long orderID){
         if (orderServices.isExistObject(orderID)){
             editMenu();
             Order newOrder = new Order();
@@ -266,22 +266,22 @@ public class OrderViews {
             int choice = AppUtils.retryParseIntInput();
             switch (choice){
                 case 1:
-                    System.out.print("Nhập họ và tên: ");
+                    System.out.print(">Nhập họ và tên: ");
                     String customerFullName = AppUtils.retryFullNameInput();
                     newOrder.setCustomerFullName(customerFullName);
                     break;
                     case 2:
-                        System.out.print("Nhập số điện thoại: ");
+                        System.out.print(">Nhập số điện thoại: ");
                         String customerPhoneNumber = AppUtils.retryPhonenumberInput();
                         newOrder.setCustomerPhoneNumber(customerPhoneNumber);
                         break;
                     case 3:
-                        System.out.print("Nhập địa chỉ: ");
+                        System.out.print(">Nhập địa chỉ: ");
                         String customerAddress = AppUtils.retryStreetAdressInput();
                         newOrder.setCustomerAddress(customerAddress);
                         break;
                     case 4:
-                        System.out.print("Nhập email: ");
+                        System.out.print(">Nhập email: ");
                         String customerEmail = AppUtils.retryEmailInput();
                         newOrder.setCustomerEmail(customerEmail);
                         break;
@@ -291,7 +291,7 @@ public class OrderViews {
                     case 0:
                         break;
                     default:
-                        System.out.println("Nhập sai chức năng. Kiểm tra lại.");
+                        System.out.println(">Nhập sai chức năng. Kiểm tra lại.");
                         break;
                 }
                 if (choice!=0){
@@ -302,7 +302,7 @@ public class OrderViews {
                     }
                 }
             }else {
-                System.out.println("Mã ID này không tồn tại. Kiểm tra lại.");
+                System.out.println(">Mã ID này không tồn tại. Kiểm tra lại.");
             }
     }
     public void findOrderAdminMenu(){
@@ -326,7 +326,7 @@ public class OrderViews {
                     break;
                 default:
                     isRetry = true;
-                    System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                    System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
                     break;
             }
             if (choice != 1 && choice != 2 && choice !=0)
@@ -337,7 +337,7 @@ public class OrderViews {
         //showOrderList(orderList, Options.FIND);
         boolean isContinus = false;
         do {
-            System.out.print("Nhập mã ID hóa đơn: ");
+            System.out.print(">Nhập mã ID hóa đơn: ");
             long orderID = AppUtils.retryParseLongInput();
             if (orderServices.isExistObject(orderID)){
                 Order order = orderServices.findObject(orderID);
@@ -351,7 +351,7 @@ public class OrderViews {
                 //showOrderDetail(order,Options.STATISTICAL);
 //                showOrderDetail(orderServices.findRemovedObject(orderID),Options.STATISTICAL);
             } else{
-                System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+                System.out.println(">Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
                 isContinus = AppUtils.isRetry(Options.FIND);
             }
         }while (isContinus);
@@ -359,16 +359,16 @@ public class OrderViews {
     }
     public void findExistOrder(){
         //showOrderList(OrderServices.findAll(),Options.STATISTICAL);
-        System.out.print("Nhập mã ID hóa đơn: ");
+        System.out.print(">Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isExistObject(orderID)){
             showOrderDetail(orderServices.findObject(orderID),Options.SHOW);
         }else
-            System.out.println("Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
+            System.out.println(">Mã ID hóa đơn này không tồn tại. Kiểm tra lại.");
     }
     private void findRemovedOrder(){
 //        showOrderList(OrderServices.findAllOrdersRemoved(),Options.REMOVE);
-        System.out.print("Nhập mã ID hóa đơn: ");
+        System.out.print(">Nhập mã ID hóa đơn: ");
         long orderID = AppUtils.retryParseLongInput();
         if (orderServices.isRemoveObject(orderID)){
             showOrderDetail(orderServices.findRemovedObject(orderID),Options.STATISTICAL);
@@ -584,27 +584,27 @@ public class OrderViews {
     }
     public void statisticalByDay(){
         Instant days = AppUtils.retryDayInput();
-        System.out.printf("═════════════════════════════════════════ DOANH THU NGÀY %s ════════════════════════════════════\n", DateTimeUtil.formatDayIntanceToString(days));
+        System.out.printf("═════════════════════════════════════════════════════════════════════════ DOANH THU NGÀY %s ════════════════════════════════════════════════════════════════════\n", DateTimeUtil.formatDayIntanceToString(days));
         double statisticalByDay = orderServices.statisticalByDay(days);
         showStatistical(statisticalByDay, orderServices.statisticalByDayList(days));
     }
     public void statisticalByMonth(){
         Instant months = AppUtils.retryMonthInput();
-        System.out.printf("═════════════════════════════════════════ DOANH THU THÁNG %s ════════════════════════════════════\n", DateTimeUtil.formatMonthIntanceToString(months));
+        System.out.printf("════════════════════════════════════════════════════════════════ DOANH THU THÁNG %s ════════════════════════════════════════════════════════════════════\n", DateTimeUtil.formatMonthIntanceToString(months));
         double statisticalByMonth = orderServices.statisticalByMonth(months);
         showStatistical(statisticalByMonth,orderServices.statisticalByMonthList(months));
     }
     public void statisticalByYear(){
         Instant years = AppUtils.retryYearInput();
-        System.out.printf("═════════════════════════════════════════ DOANH THU NĂM %s ════════════════════════════════════\n", DateTimeUtil.formatYearIntanceToString(years));
+        System.out.printf("═════════════════════════════════════════════════════════════════════════ DOANH THU NĂM %s ════════════════════════════════════════════════════════════════════\n", DateTimeUtil.formatYearIntanceToString(years));
         double statisticalByYear = orderServices.statisticalByYear(years);
         showStatistical(statisticalByYear,orderServices.statisticalByYearList(years));
     }
     private void showStatistical(double statistical, List<Order> orderList){
-        showOrderList(orderList,Options.STATISTICAL);
-        System.out.println("║-----------------------------------------------------------------------------------------------------║");
-        System.out.printf("║                                                         TỔNG DOANH THU: %-20s \t\t  ║\n", statistical);
-        System.out.println("║-----------------------------------------------------------------------------------------------------║");
+        showOrderList(orderList,Options.FIND);
+        System.out.println("|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|");
+        System.out.printf("|                                                                                                                           TỔNG DOANH THU: %-20s \t\t|\n", statistical);
+        System.out.println("|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|");
         System.out.println(">Nhập phím bất kì để tiếp tục.");
         String anyKey = scanner.nextLine();
     }

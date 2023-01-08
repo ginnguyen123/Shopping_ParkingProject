@@ -92,7 +92,7 @@ public class OrderItemViews {
         Order order = orderServices.findObject(orderID);
         productViews.showProductList(Options.ADD, ProductServices.findAll());
         //
-            System.out.print("Nhập mã ID sản phẩm: ");
+            System.out.print(">Nhập mã ID sản phẩm: ");
             long productID = AppUtils.retryParseLongInput();
             if (productServices.isExistObject(productID)) {
                 Product product = productServices.findObject(productID);
@@ -132,7 +132,7 @@ public class OrderItemViews {
                 orderServices.edit(order);
 
             } else {
-                System.out.println("Mã ID sản phẩm không tồn tại. Kiểm tra lại.");
+                System.out.println(">Mã ID sản phẩm không tồn tại. Kiểm tra lại.");
             }
     }
     private int quantitisOrderItemInput(long productID){
@@ -170,7 +170,7 @@ public class OrderItemViews {
     }
     public void edit(long orderID){
         if (showOrderItemExistList(orderID)){
-            System.out.print("Nhập mã ID mục sản phẩm cần thay đổi: ");
+            System.out.print(">Nhập mã ID mục sản phẩm cần thay đổi: ");
             int choice = -1;
             boolean isRetry = false;
             do {
@@ -193,14 +193,14 @@ public class OrderItemViews {
                             isRetry = false;
                             break;
                         default:
-                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
+                            System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
                             System.out.print(">Nhập lại: ");
                             isRetry = true;
                             break;
                     }
                 }else{
-                    System.out.println("Mã ID mục sản phẩm không tồn tại. Kiểm tra lại.");
-                    System.out.print("Nhập lại: ");
+                    System.out.println(">Mã ID mục sản phẩm không tồn tại. Kiểm tra lại.");
+                    System.out.print(">Nhập lại: ");
                     isRetry = true;
                 }
             }while (isRetry);
@@ -208,10 +208,10 @@ public class OrderItemViews {
     }
 
     private void editQuantitis(long orderItemID){
-        System.out.print("Nhập số lượng muốn thay đổi: ");
+        System.out.print(">Nhập số lượng muốn thay đổi: ");
         int quantitis = AppUtils.retryParseIntInput(); // số lượng nhập vào
         if (quantitis<=0){
-            System.out.println("Nhập số lượng cần lớn hơn 0. Kiểm tra lại.");
+            System.out.println(">Nhập số lượng cần lớn hơn 0. Kiểm tra lại.");
         }else {
             OrderItems orderItems = orderItemServices.findObject(orderItemID);
             long productID = orderItems.getProductID();
@@ -226,7 +226,7 @@ public class OrderItemViews {
                     deltaQuantitys = Math.abs(quantitis - orderItems.getQuantitis());
 //                    System.out.println("TH tăng số lượng.");
                     if (deltaQuantitys>product.getQuantitys()){
-                        System.out.printf("Số lượng sản phẩm hiện có %d không đủ. Cần thay đổi số lượng nhỏ hơn.\n",product.getQuantitys());
+                        System.out.printf(">Số lượng sản phẩm hiện có %d không đủ. Cần thay đổi số lượng nhỏ hơn.\n",product.getQuantitys());
                     }else {
                         product.setQuantitys(product.getQuantitys() - deltaQuantitys);
                         orderItems.setQuantitis(quantitis);
@@ -264,7 +264,7 @@ public class OrderItemViews {
                 productServices.editProductRemoved(product1);
                 productServices.edit(product);
                 orderServices.edit(order);
-                System.out.println("Đã cập nhật thành công!");
+                System.out.println(">Đã cập nhật thành công!");
             }
         }
     }

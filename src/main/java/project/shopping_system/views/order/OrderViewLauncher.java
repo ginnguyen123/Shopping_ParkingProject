@@ -96,15 +96,15 @@ public class OrderViewLauncher {
                             isReturn = false;
                             break;
                         case EXIT:
-                            System.out.println("Thoát chương trình.");
+                            System.out.println(">Thoát chương trình.");
                             System.exit(1);
                         default:
-                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                            System.out.print("Nhập lại: ");
+                            System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
+                            System.out.print(">Nhập lại: ");
                     }
                 }catch (Exception e){
                     System.out.println(">Nhập sai cú pháp. Kiểm tra lại.");
-                    System.out.print("Nhập lại: ");
+                    System.out.print(">Nhập lại: ");
                 }
         }while (isReturn);
         }
@@ -136,17 +136,17 @@ public class OrderViewLauncher {
                             isReturn = false;
                             break;
                         case EXIT:
-                            System.out.println("Thoát chương trình");
+                            System.out.println(">Thoát chương trình");
                             System.exit(1);
                             break;
                         default:
-                            System.out.println("Chọn sai chức năng. Kiểm tra lại.");
-                            System.out.print("Nhập lại: ");
+                            System.out.println(">Chọn sai chức năng. Kiểm tra lại.");
+                            System.out.print(">Nhập lại: ");
                             isReturn = true;
                     }
                 }catch (Exception e){
                     System.out.println(">Nhập sai cú pháp. Kiểm tra lại.");
-                    System.out.print("Nhập lại: ");
+                    System.out.print(">Nhập lại: ");
                     isReturn = true;
                 }
             }while (isReturn);

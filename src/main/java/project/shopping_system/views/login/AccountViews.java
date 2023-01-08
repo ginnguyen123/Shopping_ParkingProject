@@ -64,7 +64,7 @@ public class AccountViews {
             System.out.printf("Bạn muốn cập nhật tài khoản %s\n",userName);
             if (AppUtils.isAcceptMenu()){
                 accountServices.add(account);
-                System.out.println("Đã cập nhật thông tin thành công.");
+                System.out.println(">Đã cập nhật thông tin thành công.");
                 isRetry = AppUtils.isRetry(Options.SHOW);
             }else
                 isRetry = false;
@@ -72,7 +72,7 @@ public class AccountViews {
     }
     public void edit(Account account){
         showAccountList(Options.EDIT);
-        System.out.print("Nhập mã ID user: ");
+        System.out.print(">Nhập mã ID user: ");
         long userID = AppUtils.retryParseLongInput();
         if (accountServices.isExistObject(userID)){
             Account accountFind = accountServices.findObject(userID);
@@ -81,7 +81,7 @@ public class AccountViews {
                 if (password !=null){
                     account.setPassWord(password);
                     accountServices.edit(account);
-                    System.out.println("Đã cập nhật mật khẩu thành công.");
+                    System.out.println(">Đã cập nhật mật khẩu thành công.");
                     System.out.println("Ấn phím bất kì để đăng nhập lại.");
                     String anyPush = scanner.nextLine();
                     LoginViews.Laucher();
@@ -91,7 +91,7 @@ public class AccountViews {
                 if (password != null){
                     accountFind.setPassWord(password);
                     accountServices.edit(accountFind);
-                    System.out.println("Đã cập nhật mật khẩu thành công.");
+                    System.out.println(">Đã cập nhật mật khẩu thành công.");
                 }
             }
         }else {
@@ -99,51 +99,51 @@ public class AccountViews {
         }
     }
     private String passwordInputView(){
-        System.out.print("Nhập mật khẩu cũ: ");
+        System.out.print(">Nhập mật khẩu cũ: ");
         String oldPassword = scanner.nextLine();
         if(accountServices.isExistPassword(oldPassword)){
-            System.out.print("Nhập mật khẩu mới: ");
+            System.out.print(">Nhập mật khẩu mới: ");
             String newPass1 = scanner.nextLine();
-            System.out.print("Nhập lại mật khẩu mới: ");
+            System.out.print(">Nhập lại mật khẩu mới: ");
             String newPass2 = scanner.nextLine();
             if (newPass1.equals(newPass2)){
                 return newPass1;
             }else{
-                System.out.print("Mật khẩu mới không đúng. Kiểm tra lại.");
+                System.out.print(">Mật khẩu mới không đúng. Kiểm tra lại.");
             }
         }else{
-            System.out.println("Mật khẩu không đúng. Kiểm tra lại.");
+            System.out.println(">Mật khẩu không đúng. Kiểm tra lại.");
         }
         return null;
     }
     public void remove(){
         showAccountList(Options.REMOVE);
-        System.out.print("Nhập mã ID user: ");
+        System.out.print(">Nhập mã ID user: ");
         long userID = AppUtils.retryParseLongInput();
         if (accountServices.isExistObject(userID)){
             Account account = accountServices.findObject(userID);
             if (account.getAccountTypes() == AccountTypes.ADMIN){
-                System.out.println("Tài khoản này không thể xóa!");
+                System.out.println(">Tài khoản này không thể xóa!");
             }else {
                 showUserAccount(account);
                 System.out.printf("Bạn muốn xóa tài khoản %s này?\n",account.getUserName());
                 if (AppUtils.isAcceptMenu()){
                     accountServices.remove(account.getAccountID());
-                    System.out.println("Đã xóa tài khoản thành công!");
+                    System.out.println(">Đã xóa tài khoản thành công!");
                 }
             }
         }else {
-            System.out.println("Mã ID user không tồn tại. Kiểm tra lại.");
+            System.out.println(">Mã ID user không tồn tại. Kiểm tra lại.");
         }
     }
     public void find(){
-        System.out.print("Nhập mã ID user: ");
+        System.out.print(">Nhập mã ID user: ");
         long userID = AppUtils.retryParseLongInput();
         if (accountServices.isExistObject(userID)){
             showUserAccount(accountServices.findObject(userID));
         }else{
             System.out.println(">Mã ID user không tồn tại!");
-            System.out.println("Ấn phím bất kì để tiếp tục.");
+            System.out.println(">Ấn phím bất kì để tiếp tục.");
             String anyPush = scanner.nextLine();
         }
 
